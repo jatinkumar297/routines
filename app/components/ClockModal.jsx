@@ -115,12 +115,12 @@ const DigitalClockLabel = ({ label, value, inputState, clockState, setClockState
 				autoFocus={clockState.mode === value}
 				onPressIn={() => setClockState(prev => ({ ...prev, mode: value }))}
 				maxLength={2}
-				value={clockState[label].toString()}
-				onChangeText={value =>
-					(+value <= 12 || (value === 1 && +value < 60)) &&
+				value={clockState.mode !== value ? clockState[label].toString().padStart(2, "0") : clockState[label]}
+				onChangeText={_value =>
+					(+_value <= 12 || (value === 1 && +_value < 60)) &&
 					setClockState(prev => ({
 						...prev,
-						[label]: value
+						[label]: _value
 					}))
 				}
 			/>
@@ -131,7 +131,7 @@ const DigitalClockLabel = ({ label, value, inputState, clockState, setClockState
 					style={[styles.hourLabel, clockState.mode === value ? styles.hourLabelSelected : {}]}
 					android_ripple={{ color: COLORS.DARK_SECONDARY }}
 				>
-					<Text style={[styles.hourLabelFont]}>{clockState[label]}</Text>
+					<Text style={[styles.hourLabelFont]}>{clockState[label].padStart(2, "0")}</Text>
 				</Pressable>
 			</View>
 		)}

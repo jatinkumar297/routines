@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { StyleSheet, View, TextInput, Text, Pressable, TextInputBase } from "react-native"
+import { StyleSheet, View, TextInput, Text, Pressable } from "react-native"
 import { COLORS, FONT, weekDays } from "../utils/constants"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import { Ionicons } from "@expo/vector-icons"
@@ -87,7 +87,9 @@ const Repeats = ({ navigation }) => {
 							style={[styles.weekDay, data?.every?.week_day?.includes(idx) ? styles.selectedWeekDay : {}]}
 							onPress={() => handleWeekDay(idx)}
 						>
-							<ThemeText style={data?.every?.week_day?.includes(idx) ? { color: "#0742a0" } : null}>{i}</ThemeText>
+							<ThemeText style={data?.every?.week_day?.includes(idx) ? { color: COLORS.THEME_DARK } : null}>
+								{i}
+							</ThemeText>
 						</Pressable>
 					))}
 				</View>
@@ -193,7 +195,6 @@ const styles = StyleSheet.create({
 	},
 	selectedWeekDay: {
 		backgroundColor: COLORS.THEME,
-		color: COLORS.THEME_DARK,
 		borderColor: COLORS.THEME
 	}
 })
