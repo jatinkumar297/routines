@@ -31,13 +31,15 @@ const BottomSheet = ({ refRBSheet, heading, data, iconHidden }) => (
 			</View>
 		)}
 		{data?.map((i, idx) => (
-			<View style={idx > 0 ? { borderTopColor: COLORS.BORDER, borderTopWidth: 1 } : {}}>
-				{i.map(({ action, label, detail, Icon, rippleDisabled, disabled }) => (
+			<View key={`${i.length}-${idx}`} style={idx > 0 ? { borderTopColor: COLORS.BORDER, borderTopWidth: 1 } : {}}>
+				{i.map(({ action, label, detail, Icon, rippleDisabled, disabled }, _idx) => (
 					<ThemeButton
+						key={label + _idx}
 						style={styles.element}
 						_containerStyle={{ width: "100%" }}
 						rippleBordered
 						rippleDisabled={rippleDisabled}
+						onPress={action}
 					>
 						{!iconHidden && (
 							<View style={styles.icon}>{Icon && <Icon size={FONT.xxLarge} color={COLORS.FONT_PRIMARY} />}</View>

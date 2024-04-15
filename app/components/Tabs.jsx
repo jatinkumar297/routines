@@ -5,7 +5,7 @@ import { StyleSheet } from "react-native"
 
 const Tab = createMaterialTopTabNavigator()
 
-export default function Tabs() {
+export default function Tabs({ listNames }) {
 	return (
 		<Tab.Navigator
 			sceneContainerStyle={{
@@ -37,7 +37,10 @@ export default function Tabs() {
 				}
 			}}
 		>
-			<Tab.Screen name="Default" component={Routine} />
+			<Tab.Screen key="starred" name="Starred" component={Routine} initialParams={{ listId: 0 }} />
+			{listNames?.map(i => (
+				<Tab.Screen key={i._id} name={i.title} component={Routine} initialParams={{ listId: i._id }} />
+			))}
 		</Tab.Navigator>
 	)
 }

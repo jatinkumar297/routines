@@ -1,21 +1,44 @@
 import React, { useState } from "react"
 import { StyleSheet, View, TextInput } from "react-native"
-import { COLORS, FONT } from "../utils/constants"
+import { COLORS, FONT, defaultHPadding } from "../utils/constants"
 import { AntDesign } from "@expo/vector-icons"
 import globalStyles from "../utils/globalStyles"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
+import { useStore } from "../store"
 
 function NameModal({ navigation }) {
 	const [name, setName] = useState("")
+	const addNewList = useStore(state => state.addNewList)
+	const addNewListWrapper = async () => {
+		await addNewList(name)
+		navigation.goBack()
+	}
+
 	return (
 		<View style={styles.container}>
-			<View style={globalStyles.header}>
-				<ThemeButton onPress={() => navigation.goBack()} rippleRadius={24}>
-					<AntDesign name="close" style={globalStyles.icon} />
-				</ThemeButton>
-				<ThemeText style={{ fontSize: FONT.xLarge }} center>
-					Create new routine
-				</ThemeText>
+			<View style={[globalStyles.header, { justifyContent: "space-between" }]}>
+				<View
+					style={{
+						flexDirection: "row",
+						alignItems: "center",
+						gap: defaultHPadding
+					}}
+				>
+					<ThemeButton
+						onPress={() => navigation.goBack()}
+						rippleRadius={24}
+						_containerStyle={{ alignSelf: "center" }}
+					>
+						<AntDesign name="close" style={globalStyles.icon} />
+					</ThemeButton>
+					<ThemeText style={{ fontSize: FONT.xLarge }}>Create new routine</ThemeText>
+				</View>
+
+				{name?.length > 0 && (
+					<ThemeButton _containerStyle={{ alignSelf: "center" }} rippleDisabled onPress={addNewListWrapper}>
+						<ThemeText theme>Done</ThemeText>
+					</ThemeButton>
+				)}
 			</View>
 			<View style={styles.inputView}>
 				<TextInput

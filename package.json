@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "1.18.2",
     "@react-native-masked-view/masked-view": "0.2.9",
     "@react-navigation/material-top-tabs": "^6.6.5",
     "@react-navigation/native": "^6.1.9",
@@ -16,11 +17,14 @@
     "@shopify/flash-list": "1.4.3",
     "expo": "~49.0.15",
     "expo-font": "~11.4.0",
+    "immer": "^10.0.4",
+    "nanoid": "^5.0.7",
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-mask-input": "^1.2.3",
     "react-native-raw-bottom-sheet": "^3.0.0",
-    "react-native-tab-view": "^3.5.2"
+    "react-native-tab-view": "^3.5.2",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

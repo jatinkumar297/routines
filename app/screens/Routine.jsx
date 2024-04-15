@@ -1,82 +1,158 @@
-import React from "react"
+import React, { useCallback, useRef, useState } from "react"
 import { StyleSheet, View, ScrollView } from "react-native"
 import { COLORS, FONT } from "../utils/constants"
-import { Feather } from "@expo/vector-icons"
+import { MaterialCommunityIcons, MaterialIcons, Feather, Entypo } from "@expo/vector-icons"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import TimeInput from "../components/TimeInput"
+import { useStore } from "../store"
+import BottomBar from "../components/BottomBar"
+import BottomSheet from "../components/BottomSheet"
 
-const tasks = [
-	"Complete React Native Tutorial",
-	"Create a new project in React Native",
-	"Improve task management UI",
-	"Schedule weekly team meeting",
-	"Implement dark mode in the app",
-	"Review and refactor codebase",
-	"Write unit tests for critical functions",
-	"Plan marketing strategy for the month",
-	"Learn a new JavaScript framework",
-	"Optimize app performance",
-	"Brainstorm new feature ideas",
-	"Attend virtual conference on mobile development",
-	"Create wireframes for upcoming features",
-	"Write documentation for API endpoints",
-	"Research latest design trends",
-	"Implement user authentication",
-	"Write blog post about coding tips",
-	"Update project dependencies",
-	"Test app on multiple devices",
-	"Collaborate with UX designer on UI improvements",
-	"Plan and execute social media campaign",
-	"Investigate and fix a bug reported by users",
-	"Explore new libraries for state management",
-	"Create tutorial video for a coding concept",
-	"Review and respond to user feedback",
-	"Implement push notifications",
-	"Create a checklist for project milestones",
-	"Practice responsive design principles",
-	"Backup and secure project data"
-]
+function Routine({ navigation, route }) {
+	const bottomBarData = useCallback(
+		() => ({
+			leftSideData: [
+				{
+					label: "list",
+					Icon: props => <MaterialIcons name="list-alt" size={26} {...props} />,
+					action: () => handleBottomSheet(0)
+				},
+				{
+					label: "sort",
+					Icon: props => <MaterialCommunityIcons name="swap-vertical" size={24} {...props} />,
+					action: () => handleBottomSheet(1)
+				},
+				{
+					label: "menu",
+					Icon: props => <Entypo name="dots-three-horizontal" size={FONT.medium} {...props} />,
+					action: () => handleBottomSheet(2)
+				}
+			],
+			rightSideData: [
+				{
+					label: "add",
+					Component: () => (
+						<ThemeButton
+							style={styles.addIcon}
+							borderRadius={15}
+							onPress={() => navigation.push("name", { id: 2 })}
+						>
+							<MaterialIcons name="add" color={"#c3e7ff"} size={26} />
+						</ThemeButton>
+					)
+				}
+			]
+		}),
+		[]
+	)()
+	const bottomSheetData = useCallback(
+		() => [
+			{
+				data: [
+					[
+						{
+							label: "Starred",
+							rippleDisabled: true,
+							Icon: props => <MaterialCommunityIcons name="star-outline" {...props} />
+						}
+					],
+					[
+						{ label: "My Tasks", Icon: props => <Feather name="check" {...props} /> },
+						{ label: "Order List" },
+						{ label: "New List" }
+					],
+					[
+						{
+							label: "Create new list",
+							rippleDisabled: true,
+							Icon: props => <MaterialIcons name="add" {...props} />,
+							action: () => {
+								navigation.push("name")
+								setSheetDataIndex(null)
+							}
+						}
+					]
+				]
+			},
+			{
+				label: "Sort by",
+				data: [
+					[
+						{ label: "My Order", Icon: props => <Feather name="check" {...props} /> },
+						{ label: "Date" },
+						{ label: "Starred recently" }
+					]
+				]
+			},
+			{
+				iconHidden: true,
+				data: [
+					[
+						{ label: "Rename list" },
+						{ label: "Delete list", detail: "Default list can't be deleted", disabled: true },
+						{ label: "Delete all completed tasks" }
+					]
+				]
+			}
+		],
+		[]
+	)()
 
-function Routine({ navigation }) {
+	const tasks = useStore(state => state.lists.find(i => i._id === route.params?.listId)?.tasks)
+	const refBottomSheet = useRef()
+
+	const [sheetDataIndex, setSheetDataIndex] = useState(null)
+
+	const handleBottomSheet = index => {
+		setSheetDataIndex(index)
+		refBottomSheet.current.open()
+	}
+
 	return (
-		<ScrollView>
-			{tasks?.map((item, index) => (
-				<ThemeButton rippleBordered key={item} onPress={() => navigation.push("task", { id: 1 })}>
-					<View style={[styles.task, index + 1 === tasks.length ? styles.lastTask : {}]}>
-						<Feather name="circle" size={FONT.xLarge} color={COLORS.FONT_PRIMARY} style={{ top: FONT.xSmall }} />
-						<View style={{ flexShrink: 1, gap: 4 }}>
-							<ThemeText style={{ fontSize: FONT.medium }}>{item}</ThemeText>
-							<View style={{ paddingBottom: 5, paddingRight: 20 }}>
-								<ThemeText style={{ fontSize: FONT.small }} numberOfLines={2}>
-									The leather jacked showed the scars of being his favorite for years. It wore those scars with
-									pride, feeling that they enhanced his presence rather than diminishing it. The scars gave it
-									character and had not overwhelmed to the point that it had become ratty. The jacket was in its
-									prime and it knew it.
-								</ThemeText>
+		<>
+			<ScrollView>
+				{tasks?.map((task, index) => (
+					<ThemeButton rippleBordered key={task._id} onPress={() => navigation.push("task", { id: 1 })}>
+						<View style={[styles.task, index + 1 === tasks.length ? styles.lastTask : {}]}>
+							<Feather name="circle" size={FONT.xLarge} color={COLORS.FONT_PRIMARY} style={{ top: FONT.xSmall }} />
+							<View style={{ flexShrink: 1, gap: 4 }}>
+								<ThemeText style={{ fontSize: FONT.medium }}>{task.title}</ThemeText>
+								{Boolean(title.description) && (
+									<View style={{ paddingBottom: 5, paddingRight: 20 }}>
+										<ThemeText style={{ fontSize: FONT.small }} numberOfLines={2}>
+											{title.description}
+										</ThemeText>
+									</View>
+								)}
+								<TimeInput />
 							</View>
-							<TimeInput />
 						</View>
-					</View>
-				</ThemeButton>
-			))}
-			<ThemeText style={styles.completedHeading}>Completed (2)</ThemeText>
-			{tasks?.map((item, index) => (
-				<ThemeButton key={item + index} rippleBordered>
-					<View style={styles.task}>
-						<Feather name="check" size={FONT.xLarge} color={COLORS.THEME} style={{ top: FONT.xSmall }} />
-						<View style={{ flexShrink: 1, gap: 4 }}>
-							<ThemeText style={{ fontSize: FONT.medium, textDecorationLine: "line-through" }}>{item}</ThemeText>
-							<ThemeText style={{ fontSize: FONT.small, textDecorationLine: "line-through" }} numberOfLines={2}>
-								The leather jacked showed the scars of being his favorite for years. It wore those scars with
-								pride, feeling that they enhanced his presence rather than diminishing it. The scars gave it
-								character and had not overwhelmed to the point that it had become ratty. The jacket was in its
-								prime and it knew it.
-							</ThemeText>
-						</View>
-					</View>
-				</ThemeButton>
-			))}
-		</ScrollView>
+					</ThemeButton>
+				))}
+				{/* <ThemeText style={styles.completedHeading}>Completed (2)</ThemeText>
+					{tasks?.map((item, index) => (
+						<ThemeButton key={item + index} rippleBordered>
+							<View style={styles.task}>
+								<Feather name="check" size={FONT.xLarge} color={COLORS.THEME} style={{ top: FONT.xSmall }} />
+								<View style={{ flexShrink: 1, gap: 4 }}>
+									<ThemeText style={{ fontSize: FONT.medium, textDecorationLine: "line-through" }}>{item}</ThemeText>
+									<ThemeText style={{ fontSize: FONT.small, textDecorationLine: "line-through" }} numberOfLines={2}>
+									</ThemeText>
+								</View>
+							</View>
+						</ThemeButton>
+					))}*/}
+			</ScrollView>
+
+			<BottomBar {...bottomBarData} />
+			<BottomSheet
+				refRBSheet={refBottomSheet}
+				heading={bottomSheetData[sheetDataIndex]?.label}
+				data={bottomSheetData[sheetDataIndex]?.data}
+				iconHidden={bottomSheetData[sheetDataIndex]?.iconHidden}
+				onClose={() => setSheetDataIndex(null)}
+			/>
+		</>
 	)
 }
 
@@ -95,6 +171,10 @@ const styles = StyleSheet.create({
 		fontSize: FONT.normal,
 		paddingHorizontal: 24,
 		paddingVertical: 18
+	},
+	addIcon: {
+		backgroundColor: "#004a77",
+		padding: 14
 	}
 })
 
