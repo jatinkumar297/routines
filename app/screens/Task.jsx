@@ -1,18 +1,21 @@
-import React, { useEffect, useRef, useState } from "react"
-import { View, TextInput, StyleSheet, Animated, Dimensions, StatusBar } from "react-native"
+import React, { useRef, useState } from "react"
+import { View, TextInput, StyleSheet, Animated, Dimensions, StatusBar, TouchableOpacity } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { COLORS, FONT, defaultHPadding } from "../utils/constants"
 import globalStyles from "../utils/globalStyles"
 import { ThemeButton, ThemeText } from "../components/ThemeComponents"
 import { AntDesign } from "@expo/vector-icons"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { MaterialCommunityIcons, MaterialIcons, Feather } from "@expo/vector-icons"
 import TimeInput from "../components/TimeInput"
 import DateTimeModal from "../components/DateTimeModal"
-import { hPadd, modalWidth } from "../components/CustomModal"
+import BottomBar from "../components/BottomBar"
+import BottomSheet from "../components/BottomSheet"
 
 const wHeight = Dimensions.get("window").height
 
 function Task({ navigation, id }) {
+	const refBottomSheet = useRef()
+
 	const [dateTimeModal, setDateTimeModal] = useState()
 	const [task, setTask] = useState({
 		title: "The Good Stuff",
@@ -20,8 +23,8 @@ function Task({ navigation, id }) {
 			"This is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test."
 	})
 
-	const setData = data => setTask(prev => ({ ...prev, ...data }))
 	const translateY = useRef(new Animated.Value(wHeight)).current
+	const setData = data => setTask(prev => ({ ...prev, ...data }))
 
 	const showModal = () => {
 		setTimeout(
@@ -52,16 +55,16 @@ function Task({ navigation, id }) {
 		<>
 			<View style={styles.container}>
 				<View style={[globalStyles.header, styles.header]}>
-					<ThemeButton onPress={() => navigation.goBack()} borderRadius={24}>
+					<ThemeButton onPress={() => navigation.goBack()} rippleRadius={24}>
 						<Ionicons name="arrow-back-sharp" style={globalStyles.icon} />
 					</ThemeButton>
 				</View>
-				<View style={styles.listTrigger}>
+				<TouchableOpacity onPress={() => refBottomSheet.current.open()} style={styles.listTrigger}>
 					<ThemeText style={{ fontSize: FONT.small }} theme>
 						My Tasks
 					</ThemeText>
 					<AntDesign name="caretdown" size={FONT.xxSmall} color={COLORS.THEME} />
-				</View>
+				</TouchableOpacity>
 				<TextInput
 					value={task?.title}
 					onTextInput={title => setData({ title })}
@@ -80,7 +83,7 @@ function Task({ navigation, id }) {
 
 				<View style={styles.inputWrapper}>
 					<MaterialCommunityIcons name="clock-time-four-outline" style={globalStyles.icon} />
-					<TimeInput onPress={showModal} />
+					<TimeInput onPress={showModal} advanced />
 				</View>
 			</View>
 
@@ -105,6 +108,31 @@ function Task({ navigation, id }) {
 					<DateTimeModal navigation={navigation} visible={dateTimeModal?.active} close={closeModal} />
 				</Animated.View>
 			</View>
+			<BottomBar
+				rightSideData={[
+					{
+						Component: () => (
+							<View style={{ flexDirection: "row", justifyContent: "flex-end", width: "100%" }}>
+								<ThemeButton
+									style={{ paddingHorizontal: 12, paddingVertical: 15, marginRight: 10 }}
+									rippleBordered
+								>
+									<ThemeText style={{ fontSize: FONT.default, fontWeight: 600 }} theme>
+										Mark as completed
+									</ThemeText>
+								</ThemeButton>
+							</View>
+						)
+					}
+				]}
+			/>
+			<BottomSheet
+				refRBSheet={refBottomSheet}
+				heading={"Move task to"}
+				data={[
+					[{ label: "My Tasks", Icon: props => <Feather name="check" {...props} /> }, { label: "Order List" }]
+				]}
+			/>
 		</>
 	)
 }

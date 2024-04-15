@@ -10,7 +10,7 @@ function NameModal({ navigation }) {
 	return (
 		<View style={styles.container}>
 			<View style={globalStyles.header}>
-				<ThemeButton onPress={() => navigation.goBack()} borderRadius={24}>
+				<ThemeButton onPress={() => navigation.goBack()} rippleRadius={24}>
 					<AntDesign name="close" style={globalStyles.icon} />
 				</ThemeButton>
 				<ThemeText style={{ fontSize: FONT.xLarge }} center>

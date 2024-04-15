@@ -28,15 +28,18 @@ export function ThemeButton({
 	rippleRadius,
 	borderRadius = 0,
 	style = {},
+	rippleDisabled,
 	_containerStyle = {},
 	...props
 }) {
 	const combinedStyle = (Array.isArray(style) ? style : [style]).concat({ borderRadius })
-	const rippleConfig = {
-		color: rippleColor,
-		borderless: !(borderRadius || rippleBordered),
-		...(rippleRadius ? { radius: rippleRadius } : {})
-	}
+	const rippleConfig = rippleDisabled
+		? null
+		: {
+				color: rippleColor,
+				borderless: !(borderRadius || rippleBordered),
+				...(rippleRadius ? { radius: rippleRadius } : {})
+		  }
 
 	const containerStyle = {
 		overflow: borderRadius > 0 ? "hidden" : "auto",

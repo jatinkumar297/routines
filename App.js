@@ -23,7 +23,7 @@ export default function App() {
 							headerShown: false,
 							navigationBarColor: COLORS.DARK_PRIMARY,
 							statusBarColor: COLORS.DARK_PRIMARY,
-							contentStyle: { paddingVertical: StatusBar.currentHeight },
+							contentStyle: { paddingTop: StatusBar.currentHeight, backgroundColor: COLORS.DARK_PRIMARY },
 							animation: "slide_from_right"
 						}}
 					>

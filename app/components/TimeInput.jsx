@@ -1,14 +1,24 @@
 import React from "react"
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet } from "react-native"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
 import { COLORS, FONT } from "../utils/constants"
+import { AntDesign } from "@expo/vector-icons"
 
-function TimeInput({ onPress }) {
+function TimeInput({ onPress, advanced }) {
 	return (
-		<ThemeButton style={styles.timeInputBtn} borderRadius={6} onPress={onPress}>
-			<ThemeText style={{ fontSize: FONT.small }} theme>
-				Today, 3:25 pm
+		<ThemeButton
+			style={[styles.timeInputBtn, { borderColor: advanced ? COLORS.FONT_LIGHT : COLORS.BORDER }]}
+			borderRadius={8}
+			onPress={onPress}
+		>
+			<ThemeText style={{ fontSize: FONT.small, paddingBottom: 1, fontWeight: 600 }} theme={!advanced}>
+				Today, 3:25 PM
 			</ThemeText>
+			{advanced && (
+				<Pressable>
+					<AntDesign name="close" color={COLORS.FONT_PRIMARY} size={FONT.normal} />
+				</Pressable>
+			)}
 		</ThemeButton>
 	)
 }
@@ -16,11 +26,12 @@ function TimeInput({ onPress }) {
 const styles = StyleSheet.create({
 	timeInputBtn: {
 		borderWidth: 1,
-		borderColor: COLORS.BORDER,
-		paddingVertical: 5,
-		paddingBottom: 7,
+		paddingVertical: 6,
 		paddingHorizontal: 16,
-		alignSelf: "flex-start"
+		alignSelf: "flex-start",
+		alignItems: "center",
+		flexDirection: "row",
+		gap: 14
 	}
 })
 

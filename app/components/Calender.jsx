@@ -389,7 +389,6 @@ const CalenderModal = props => {
 const MonthCalendar = memo(
 	({ monthData, onDatePress, selectedDate, month, detailed }) => (
 		<View>
-			{console.log(selectedDate)}
 			<View style={styles.table}>
 				{!detailed && (
 					<View style={styles.tableRow}>
@@ -400,7 +399,7 @@ const MonthCalendar = memo(
 						))}
 					</View>
 				)}
-				<View style={{ height: cardWidth * 0.9 }}>
+				<View style={{ height: cardWidth * 0.8 }}>
 					{monthData.weeks.map((days, week) => (
 						<View key={`${week}-${month}`} style={styles.tableRow}>
 							{days.map((date, idx) =>
@@ -459,8 +458,8 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		textAlignVertical: "center",
 		color: COLORS.FONT_PRIMARY,
-		fontSize: FONT.default,
-		marginBottom: 8
+		fontSize: 12.5,
+		marginBottom: 2
 	},
 	selectedCell: {
 		backgroundColor: COLORS.THEME,

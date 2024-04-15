@@ -1,14 +1,15 @@
 export const COLORS = {
-	DARK_PRIMARY: "#111111",
-	DARK_SECONDARY: "#ffffff16",
+	DARK_PRIMARY: "#131313",
+	DARK_SECONDARY: "#4b4c4e",
 	DARK_MODAL: "#27282c",
+	DARK_MODAL_SECONDARY: "#1b1b1b",
 	DARK_HIGHLIGHT: "#343537",
-	FONT_PRIMARY: "#d2d2d2",
+	FONT_PRIMARY: "#dfdfdf",
 	FONT_HIGHLIGHT: "#c2c4c6",
 	FONT_LIGHT: "#b2b5b9",
 	DANGER: "#f4bbb7",
-	BORDER: "#5d5f64",
-	THEME: "#a9c8fa",
+	BORDER: "#454646",
+	THEME: "#a9c7f9",
 	THEME_SEMI: "#a9c8fa10",
 	THEME_DARK: "#082c69",
 	OVERLAY: "#00000045"
@@ -37,5 +38,4 @@ export const FONT = {
 }
 
 export const weekDays = ["S", "M", "T", "W", "T", "F", "S"]
-
 export const defaultHPadding = 18

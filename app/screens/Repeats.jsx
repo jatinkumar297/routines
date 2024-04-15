@@ -8,11 +8,13 @@ import { AntDesign } from "@expo/vector-icons"
 import { CalenderModal } from "../components/Calender"
 import globalStyles from "../utils/globalStyles"
 import ClockModal from "../components/ClockModal"
+import DropDown from "../components/DropDown"
 
 const Repeats = ({ navigation }) => {
 	const [data, setData] = useState({})
 	const [clockState, setClockState] = useState()
 	const [calenderState, setCalenderState] = useState()
+	const [dropDownState, setDropDownState] = useState()
 
 	const handleData = (field, subfield, value) => {
 		setData(prev => ({
@@ -73,11 +75,17 @@ const Repeats = ({ navigation }) => {
 						value={data?.every?.cycle_length}
 						onChangeText={text => handleData("every", "cycle_length", text)}
 					/>
-					<View style={[styles.inputRect, { flexGrow: 1, flexDirection: "row", alignItems: "center" }]}>
-						<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }} lineHeightAuto>
-							Week
-						</ThemeText>
-						<AntDesign name="caretdown" style={[globalStyles.icon, { fontSize: FONT.xSmall }]} />
+					<View style={{ flexGrow: 1, position: "relative" }}>
+						<Pressable
+							style={[styles.inputRect, { flexGrow: 1, flexDirection: "row", alignItems: "center" }]}
+							onPress={() => setDropDownState(prev => !prev)}
+						>
+							<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }}>week</ThemeText>
+							<AntDesign name="caretdown" style={[globalStyles.icon, { fontSize: FONT.xxSmall }]} />
+						</Pressable>
+						{dropDownState && (
+							<DropDown data={[{ label: "day" }, { label: "week" }, { label: "month" }, { label: "year" }]} />
+						)}
 					</View>
 				</View>
 				<View style={{ flexDirection: "row", gap: 10, justifyContent: "space-between", marginVertical: 14 }}>
