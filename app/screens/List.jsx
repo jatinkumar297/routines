@@ -7,8 +7,9 @@ import TimeInput from "../components/TimeInput"
 import { useStore } from "../store"
 import BottomBar from "../components/BottomBar"
 import BottomSheet from "../components/BottomSheet"
+import EmptyMessage from "../components/EmptyMessage"
 
-function Routine({ navigation, route }) {
+function List({ navigation, route }) {
 	const bottomBarData = useCallback(
 		() => ({
 			leftSideData: [
@@ -35,7 +36,7 @@ function Routine({ navigation, route }) {
 						<ThemeButton
 							style={styles.addIcon}
 							borderRadius={15}
-							onPress={() => navigation.push("name", { id: 2 })}
+							onPress={() => navigation.push("list-title", { id: 2 })}
 						>
 							<MaterialIcons name="add" color={"#c3e7ff"} size={26} />
 						</ThemeButton>
@@ -67,7 +68,7 @@ function Routine({ navigation, route }) {
 							rippleDisabled: true,
 							Icon: props => <MaterialIcons name="add" {...props} />,
 							action: () => {
-								navigation.push("name")
+								navigation.push("list-title")
 								setSheetDataIndex(null)
 							}
 						}
@@ -110,7 +111,7 @@ function Routine({ navigation, route }) {
 
 	return (
 		<>
-			<ScrollView>
+			<ScrollView style={{ flexGrow: 0 }}>
 				{tasks?.map((task, index) => (
 					<ThemeButton rippleBordered key={task._id} onPress={() => navigation.push("task", { id: 1 })}>
 						<View style={[styles.task, index + 1 === tasks.length ? styles.lastTask : {}]}>
@@ -143,6 +144,8 @@ function Routine({ navigation, route }) {
 						</ThemeButton>
 					))}*/}
 			</ScrollView>
+
+			{!tasks?.[0] && <EmptyMessage type={route.params.listId === 0 ? 0 : 1} />}
 
 			<BottomBar {...bottomBarData} />
 			<BottomSheet
@@ -178,4 +181,4 @@ const styles = StyleSheet.create({
 	}
 })
 
-export default Routine
+export default List

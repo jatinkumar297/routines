@@ -1,0 +1,28 @@
+{
+	"state": {
+		"stale": false,
+		"type": "tab",
+		"key": "tab-MJVvGRp60X9dfW8aT_hhp",
+		"index": 1,
+		"routeNames": ["Starred", "5ctxrd", "T tct", "Yyyggg", "My list"],
+		"history": [
+			{ "type": "route", "key": "Starred-pqBYzBnSnR5wTqg-uM4gE" },
+			{ "type": "route", "key": "5ctxrd-PdavZNF5F0vnv5jSv_HNu" }
+		],
+		"routes": [
+			{ "name": "Starred", "key": "Starred-pqBYzBnSnR5wTqg-uM4gE", "params": { "listId": 0 } },
+			{ "name": "5ctxrd", "key": "5ctxrd-PdavZNF5F0vnv5jSv_HNu", "params": { "listId": "kwbrtni3g6" } },
+			{ "name": "T tct", "key": "T tct-IzTjjFYI52dQPziXL41Mm", "params": { "listId": "s0meqcmo98" } },
+			{ "name": "Yyyggg", "key": "Yyyggg-cEKLy3HZhEgKvSSAQXAdb", "params": { "listId": "8230ppc1rd" } },
+			{ "name": "My list", "key": "My list-l461igcx878bg--pqPYgD", "params": { "listId": "ve0zyhd0cc" } }
+		]
+	},
+	"position": 0.17685185372829437,
+	"layout": { "width": 374.8372802734375, "height": 49.28416061401367 },
+	"width": "auto",
+	"style": [
+		{ "backgroundColor": "rgb(169, 200, 250)" },
+		{ "height": 3, "width": 0.6, "backgroundColor": "#a9c7f9", "marginHorizontal": 10, "marginBottom": -1 }
+	],
+	"gap": 0
+}

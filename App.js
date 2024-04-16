@@ -5,9 +5,9 @@ import { MasterState } from "./app/utils/MasterContext"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import Home from "./app/screens/Home"
-import NameModal from "./app/screens/NameModal"
 import Task from "./app/screens/Task"
 import Repeats from "./app/screens/Repeats"
+import ListTitle from "./app/screens/ListTitle"
 
 Appearance.setColorScheme("dark")
 const Stack = createNativeStackNavigator()
@@ -29,7 +29,7 @@ export default function App() {
 					>
 						<Stack.Screen name="home" component={Home} />
 						<Stack.Screen name="task" component={Task} />
-						<Stack.Screen name="name" component={NameModal} options={{ animation: "fade_from_bottom" }} />
+						<Stack.Screen name="list-title" component={ListTitle} options={{ animation: "fade_from_bottom" }} />
 						<Stack.Screen name="repeats" component={Repeats} options={{ animation: "fade_from_bottom" }} />
 					</Stack.Navigator>
 				</NavigationContainer>

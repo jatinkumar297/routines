@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native"
-import { COLORS, FONT, defaultHPadding } from "./constants"
+import { COLORS, defaultHPadding } from "./constants"
 
 export default StyleSheet.create({
 	icon: {

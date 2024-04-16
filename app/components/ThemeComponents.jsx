@@ -30,6 +30,7 @@ export function ThemeButton({
 	style = {},
 	rippleDisabled,
 	_containerStyle = {},
+	onLayout,
 	...props
 }) {
 	const combinedStyle = (Array.isArray(style) ? style : [style]).concat({ borderRadius })
@@ -52,6 +53,7 @@ export function ThemeButton({
 	return (
 		<View role="button" style={containerStyle}>
 			<Pressable
+				onLayout={onLayout}
 				android_ripple={rippleConfig}
 				style={combinedStyle}
 				onPress={onPress}

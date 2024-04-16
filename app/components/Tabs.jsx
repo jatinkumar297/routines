@@ -1,46 +1,94 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs"
-import Routine from "../screens/Routine"
-import { COLORS } from "../utils/constants"
-import { StyleSheet } from "react-native"
+import List from "../screens/List"
+import { COLORS, FONT } from "../utils/constants"
+import { Alert, StyleSheet, View } from "react-native"
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
+import { ThemeButton, ThemeText } from "./ThemeComponents"
+import React from "react"
+import ListTitle from "../screens/ListTitle"
 
 const Tab = createMaterialTopTabNavigator()
 
-export default function Tabs({ listNames }) {
+export default function Tabs({ navigate, listNames }) {
 	return (
 		<Tab.Navigator
 			sceneContainerStyle={{
 				backgroundColor: COLORS.DARK_PRIMARY
 			}}
 			screenOptions={{
-				tabBarGap: 24,
+				lazy: true,
+				tabBarScrollEnabled: true,
 				tabBarActiveTintColor: COLORS.THEME,
 				tabBarInactiveTintColor: COLORS.FONT_PRIMARY,
-				tabBarPressColor: COLORS.THEME_SEMI,
+				tabBarPressColor: COLORS.HIGHLIGHT_THEME,
 				tabBarStyle: {
 					backgroundColor: COLORS.DARK_PRIMARY,
-					marginHorizontal: 0,
-					paddingHorizontal: 20,
 					borderBottomColor: COLORS.BORDER,
-					borderBottomWidth: StyleSheet.hairlineWidth
+					borderBottomWidth: 1,
+					paddingHorizontal: 10
 				},
 				tabBarItemStyle: {
 					width: "auto",
-					paddingHorizontal: 5,
+					paddingHorizontal: 15,
 					paddingVertical: 10
 				},
-				tabBarLabelStyle: { fontSize: 15, textTransform: "none" },
+				tabBarLabelStyle: { fontSize: 14, fontWeight: 600, textTransform: "none" },
 				tabBarIndicatorStyle: {
 					height: 3,
+					width: 0.6,
 					backgroundColor: COLORS.THEME,
-					marginLeft: 20,
-					marginBottom: -StyleSheet.hairlineWidth
+					marginHorizontal: 10,
+					marginBottom: -1
 				}
 			}}
 		>
-			<Tab.Screen key="starred" name="Starred" component={Routine} initialParams={{ listId: 0 }} />
-			{listNames?.map(i => (
-				<Tab.Screen key={i._id} name={i.title} component={Routine} initialParams={{ listId: i._id }} />
+			<Tab.Screen
+				name="starred"
+				component={List}
+				initialParams={{ listId: 0 }}
+				options={{
+					tabBarIcon: ({ color }) => <MaterialCommunityIcons name="star" size={FONT.xxLarge} color={color} />,
+					tabBarShowLabel: false
+				}}
+			/>
+			{listNames?.map((i, idx) => (
+				<Tab.Screen key={i._id} name={i.title} component={List} initialParams={{ listId: i._id }} />
 			))}
+			<Tab.Screen
+				name="AddNewList"
+				children={() => null}
+				options={({ route, navigation }) => ({
+					tabBarIconStyle: {
+						height: "auto",
+						width: "auto"
+					},
+					tabBarShowLabel: false,
+					tabBarIcon: () => (
+						<ThemeButton
+							style={{
+								flexDirection: "row",
+								itemsCenter: true,
+								gap: 5
+							}}
+						>
+							<MaterialIcons name="add" color={COLORS.FONT_PRIMARY} size={20} />
+							<ThemeText style={{ verticalAlign: "middle", fontSize: 14, fontWeight: 600, textTransform: "none" }}>
+								New List
+							</ThemeText>
+						</ThemeButton>
+					)
+				})}
+				listeners={({ navigation }) => ({
+					focus: ({}) => {
+						navigation.navigate(listNames.at(-1).title)
+						navigate("list-title")
+					},
+					tabPress: ({ preventDefault }) => {
+						preventDefault()
+						navigate("list-title")
+					}
+				})}
+			/>
 		</Tab.Navigator>
 	)
 }

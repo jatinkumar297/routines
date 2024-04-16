@@ -11,13 +11,13 @@ function Home({ navigation }) {
 		<View style={styles.container}>
 			<View style={styles.headerWrapper}>
 				<ThemeText style={styles.header} center>
-					Routines
+					Tasks
 				</ThemeText>
 				<View style={styles.profile}>
 					<ThemeText style={styles.profileText}>J</ThemeText>
 				</View>
 			</View>
-			<Tabs listNames={listNames} />
+			<Tabs navigate={screen => navigation.push(screen)} listNames={listNames} />
 		</View>
 	)
 }
