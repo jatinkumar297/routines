@@ -1,113 +1,14 @@
-import React, { useCallback, useRef, useState } from "react"
+import React from "react"
 import { StyleSheet, View, ScrollView } from "react-native"
 import { COLORS, FONT } from "../utils/constants"
-import { MaterialCommunityIcons, MaterialIcons, Feather, Entypo } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import TimeInput from "../components/TimeInput"
 import { useStore } from "../store"
-import BottomBar from "../components/BottomBar"
-import BottomSheet from "../components/BottomSheet"
 import EmptyMessage from "../components/EmptyMessage"
 
 function List({ navigation, route }) {
-	const bottomBarData = useCallback(
-		() => ({
-			leftSideData: [
-				{
-					label: "list",
-					Icon: props => <MaterialIcons name="list-alt" size={26} {...props} />,
-					action: () => handleBottomSheet(0)
-				},
-				{
-					label: "sort",
-					Icon: props => <MaterialCommunityIcons name="swap-vertical" size={24} {...props} />,
-					action: () => handleBottomSheet(1)
-				},
-				{
-					label: "menu",
-					Icon: props => <Entypo name="dots-three-horizontal" size={FONT.medium} {...props} />,
-					action: () => handleBottomSheet(2)
-				}
-			],
-			rightSideData: [
-				{
-					label: "add",
-					Component: () => (
-						<ThemeButton
-							style={styles.addIcon}
-							borderRadius={15}
-							onPress={() => navigation.push("list-title", { id: 2 })}
-						>
-							<MaterialIcons name="add" color={"#c3e7ff"} size={26} />
-						</ThemeButton>
-					)
-				}
-			]
-		}),
-		[]
-	)()
-	const bottomSheetData = useCallback(
-		() => [
-			{
-				data: [
-					[
-						{
-							label: "Starred",
-							rippleDisabled: true,
-							Icon: props => <MaterialCommunityIcons name="star-outline" {...props} />
-						}
-					],
-					[
-						{ label: "My Tasks", Icon: props => <Feather name="check" {...props} /> },
-						{ label: "Order List" },
-						{ label: "New List" }
-					],
-					[
-						{
-							label: "Create new list",
-							rippleDisabled: true,
-							Icon: props => <MaterialIcons name="add" {...props} />,
-							action: () => {
-								navigation.push("list-title")
-								setSheetDataIndex(null)
-							}
-						}
-					]
-				]
-			},
-			{
-				label: "Sort by",
-				data: [
-					[
-						{ label: "My Order", Icon: props => <Feather name="check" {...props} /> },
-						{ label: "Date" },
-						{ label: "Starred recently" }
-					]
-				]
-			},
-			{
-				iconHidden: true,
-				data: [
-					[
-						{ label: "Rename list" },
-						{ label: "Delete list", detail: "Default list can't be deleted", disabled: true },
-						{ label: "Delete all completed tasks" }
-					]
-				]
-			}
-		],
-		[]
-	)()
-
 	const tasks = useStore(state => state.lists.find(i => i._id === route.params?.listId)?.tasks)
-	const refBottomSheet = useRef()
-
-	const [sheetDataIndex, setSheetDataIndex] = useState(null)
-
-	const handleBottomSheet = index => {
-		setSheetDataIndex(index)
-		refBottomSheet.current.open()
-	}
 
 	return (
 		<>
@@ -146,15 +47,6 @@ function List({ navigation, route }) {
 			</ScrollView>
 
 			{!tasks?.[0] && <EmptyMessage type={route.params.listId === 0 ? 0 : 1} />}
-
-			<BottomBar {...bottomBarData} />
-			<BottomSheet
-				refRBSheet={refBottomSheet}
-				heading={bottomSheetData[sheetDataIndex]?.label}
-				data={bottomSheetData[sheetDataIndex]?.data}
-				iconHidden={bottomSheetData[sheetDataIndex]?.iconHidden}
-				onClose={() => setSheetDataIndex(null)}
-			/>
 		</>
 	)
 }
@@ -174,10 +66,6 @@ const styles = StyleSheet.create({
 		fontSize: FONT.normal,
 		paddingHorizontal: 24,
 		paddingVertical: 18
-	},
-	addIcon: {
-		backgroundColor: "#004a77",
-		padding: 14
 	}
 })
 

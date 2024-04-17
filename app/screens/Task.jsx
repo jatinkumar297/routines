@@ -9,7 +9,7 @@ import { MaterialCommunityIcons, MaterialIcons, Feather } from "@expo/vector-ico
 import TimeInput from "../components/TimeInput"
 import DateTimeModal from "../components/DateTimeModal"
 import BottomBar from "../components/BottomBar"
-import BottomSheet from "../components/BottomSheet"
+import CustomBottomSheet from "../components/CustomBottomSheet"
 
 const wHeight = Dimensions.get("window").height
 
@@ -126,8 +126,8 @@ function Task({ navigation, id }) {
 					}
 				]}
 			/>
-			<BottomSheet
-				refRBSheet={refBottomSheet}
+			<CustomBottomSheet
+				ref={refBottomSheet}
 				heading={"Move task to"}
 				data={[
 					[{ label: "My Tasks", Icon: props => <Feather name="check" {...props} /> }, { label: "Order List" }]

@@ -1,11 +1,9 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs"
 import List from "../screens/List"
 import { COLORS, FONT } from "../utils/constants"
-import { Alert, StyleSheet, View } from "react-native"
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
 import React from "react"
-import ListTitle from "../screens/ListTitle"
 
 const Tab = createMaterialTopTabNavigator()
 
@@ -51,8 +49,8 @@ export default function Tabs({ navigate, listNames }) {
 					tabBarShowLabel: false
 				}}
 			/>
-			{listNames?.map((i, idx) => (
-				<Tab.Screen key={i._id} name={i.title} component={List} initialParams={{ listId: i._id }} />
+			{listNames?.map(i => (
+				<Tab.Screen key={i._id} name={i?.title} component={List} initialParams={{ listId: i._id }} />
 			))}
 			<Tab.Screen
 				name="AddNewList"
@@ -80,7 +78,7 @@ export default function Tabs({ navigate, listNames }) {
 				})}
 				listeners={({ navigation }) => ({
 					focus: ({}) => {
-						navigation.navigate(listNames.at(-1).title)
+						navigation.navigate(listNames?.at(-1)?.title || "starred")
 						navigate("list-title")
 					},
 					tabPress: ({ preventDefault }) => {

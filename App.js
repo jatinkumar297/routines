@@ -8,13 +8,14 @@ import Home from "./app/screens/Home"
 import Task from "./app/screens/Task"
 import Repeats from "./app/screens/Repeats"
 import ListTitle from "./app/screens/ListTitle"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 
 Appearance.setColorScheme("dark")
 const Stack = createNativeStackNavigator()
 
 export default function App() {
 	return (
-		<View style={{ flex: 1, backgroundColor: COLORS.DARK_PRIMARY }}>
+		<GestureHandlerRootView style={{ flex: 1, backgroundColor: COLORS.DARK_PRIMARY }}>
 			<StatusBar barStyle={"light-content"} />
 			<MasterState>
 				<NavigationContainer theme={{ colors: theme_colors, dark: true }}>
@@ -34,6 +35,6 @@ export default function App() {
 					</Stack.Navigator>
 				</NavigationContainer>
 			</MasterState>
-		</View>
+		</GestureHandlerRootView>
 	)
 }
