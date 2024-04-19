@@ -5,6 +5,7 @@ import { AntDesign } from "@expo/vector-icons"
 import globalStyles from "../utils/globalStyles"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import { useStore } from "../store"
+import Screen from "../components/Screen"
 
 function ListTitle({ navigation }) {
 	const [title, setTitle] = useState("")
@@ -15,42 +16,44 @@ function ListTitle({ navigation }) {
 	}
 
 	return (
-		<View style={styles.container}>
-			<View style={[globalStyles.header, { justifyContent: "space-between" }]}>
-				<View
-					style={{
-						flexDirection: "row",
-						alignItems: "center",
-						gap: defaultHPadding
-					}}
-				>
-					<ThemeButton
-						onPress={() => navigation.goBack()}
-						rippleRadius={24}
-						_containerStyle={{ alignSelf: "center" }}
+		<Screen>
+			<View style={styles.container}>
+				<View style={[globalStyles.header, { justifyContent: "space-between" }]}>
+					<View
+						style={{
+							flexDirection: "row",
+							alignItems: "center",
+							gap: defaultHPadding
+						}}
 					>
-						<AntDesign name="close" color={COLORS.FONT_PRIMARY} size={FONT.xLarge} />
-					</ThemeButton>
-					<ThemeText style={{ fontSize: FONT.xLarge }}>Create new list</ThemeText>
-				</View>
+						<ThemeButton
+							onPress={() => navigation.goBack()}
+							rippleRadius={24}
+							_containerStyle={{ alignSelf: "center" }}
+						>
+							<AntDesign name="close" color={COLORS.FONT_PRIMARY} size={FONT.xLarge} />
+						</ThemeButton>
+						<ThemeText style={{ fontSize: FONT.xLarge }}>Create new list</ThemeText>
+					</View>
 
-				{title?.length > 0 && (
-					<ThemeButton _containerStyle={{ alignSelf: "center" }} rippleDisabled onPress={addNewListWrapper}>
-						<ThemeText theme>Done</ThemeText>
-					</ThemeButton>
-				)}
+					{title?.length > 0 && (
+						<ThemeButton _containerStyle={{ alignSelf: "center" }} rippleDisabled onPress={addNewListWrapper}>
+							<ThemeText theme>Done</ThemeText>
+						</ThemeButton>
+					)}
+				</View>
+				<View style={styles.inputView}>
+					<TextInput
+						onChangeText={setTitle}
+						value={title}
+						style={styles.input}
+						placeholder="Enter list title"
+						placeholderTextColor={COLORS.FONT_LIGHT}
+						autoFocus={true}
+					/>
+				</View>
 			</View>
-			<View style={styles.inputView}>
-				<TextInput
-					onChangeText={setTitle}
-					value={title}
-					style={styles.input}
-					placeholder="Enter list title"
-					placeholderTextColor={COLORS.FONT_LIGHT}
-					autoFocus={true}
-				/>
-			</View>
-		</View>
+		</Screen>
 	)
 }
 

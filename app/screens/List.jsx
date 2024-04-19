@@ -6,12 +6,13 @@ import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import TimeInput from "../components/TimeInput"
 import { useStore } from "../store"
 import EmptyMessage from "../components/EmptyMessage"
+import Screen from "../components/Screen"
 
 function List({ navigation, route }) {
 	const tasks = useStore(state => state.lists.find(i => i._id === route.params?.listId)?.tasks)
 
 	return (
-		<>
+		<Screen>
 			<ScrollView style={{ flexGrow: 0 }}>
 				{tasks?.map((task, index) => (
 					<ThemeButton rippleBordered key={task._id} onPress={() => navigation.push("task", { id: 1 })}>
@@ -47,7 +48,7 @@ function List({ navigation, route }) {
 			</ScrollView>
 
 			{!tasks?.[0] && <EmptyMessage type={route.params.listId === 0 ? 0 : 1} />}
-		</>
+		</Screen>
 	)
 }
 

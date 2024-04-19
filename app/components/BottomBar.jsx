@@ -1,11 +1,11 @@
 import React from "react"
-import { StyleSheet, View } from "react-native"
+import { SafeAreaViewComponent, StyleSheet, View } from "react-native"
 import { COLORS } from "../utils/constants"
 import { ThemeButton } from "./ThemeComponents"
 
-const BottomBar = ({ leftSideData, rightSideData }) => {
+const BottomBar = ({ leftSideData, rightSideData, overlay = true }) => {
 	return (
-		<View style={styles.bottomBarContainer}>
+		<View style={overlay ? styles.bottomBarContainer : {}}>
 			<View style={styles.contentWrapper}>
 				<View style={{ flexDirection: "row", gap: 5, height: "fit-content" }}>
 					{leftSideData?.map(({ label, Icon, action }) => (
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
 	bottomBarContainer: {
 		paddingHorizontal: 15,
 		height: 75,
-		backgroundColor: "#1e1f21",
+		backgroundColor: COLORS.DARK_BOTTOM_BG,
 		position: "absolute",
 		bottom: 0,
 		left: 0,

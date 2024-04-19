@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native"
-import { COLORS, defaultHPadding } from "./constants"
+import { COLORS, FONT, defaultHPadding } from "./constants"
 
 export default StyleSheet.create({
 	icon: {
@@ -12,5 +12,14 @@ export default StyleSheet.create({
 		gap: 18,
 		paddingHorizontal: defaultHPadding,
 		paddingVertical: 15
+	},
+	ractButton: {
+		paddingHorizontal: 16,
+		paddingVertical: 15,
+		marginRight: 10
+	},
+	ractButtonText: {
+		fontSize: FONT.default,
+		fontWeight: 600
 	}
 })

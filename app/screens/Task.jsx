@@ -1,15 +1,14 @@
 import React, { useRef, useState } from "react"
 import { View, TextInput, StyleSheet, Animated, Dimensions, StatusBar, TouchableOpacity } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
 import { COLORS, FONT, defaultHPadding } from "../utils/constants"
 import globalStyles from "../utils/globalStyles"
 import { ThemeButton, ThemeText } from "../components/ThemeComponents"
-import { AntDesign } from "@expo/vector-icons"
-import { MaterialCommunityIcons, MaterialIcons, Feather } from "@expo/vector-icons"
+import { Ionicons, AntDesign, MaterialCommunityIcons, MaterialIcons, Feather } from "@expo/vector-icons"
 import TimeInput from "../components/TimeInput"
 import DateTimeModal from "../components/DateTimeModal"
 import BottomBar from "../components/BottomBar"
-import CustomBottomSheet from "../components/CustomBottomSheet"
+import BottomMenu from "../components/BottomMenu"
+import Screen from "../components/Screen"
 
 const wHeight = Dimensions.get("window").height
 
@@ -52,7 +51,7 @@ function Task({ navigation, id }) {
 	}
 
 	return (
-		<>
+		<Screen>
 			<View style={styles.container}>
 				<View style={[globalStyles.header, styles.header]}>
 					<ThemeButton onPress={() => navigation.goBack()} rippleRadius={24}>
@@ -113,11 +112,8 @@ function Task({ navigation, id }) {
 					{
 						Component: () => (
 							<View style={{ flexDirection: "row", justifyContent: "flex-end", width: "100%" }}>
-								<ThemeButton
-									style={{ paddingHorizontal: 12, paddingVertical: 15, marginRight: 10 }}
-									rippleBordered
-								>
-									<ThemeText style={{ fontSize: FONT.default, fontWeight: 600 }} theme>
+								<ThemeButton style={globalStyles.ractButton} rippleBordered>
+									<ThemeText style={globalStyles.ractButtonText} theme>
 										Mark as completed
 									</ThemeText>
 								</ThemeButton>
@@ -126,14 +122,14 @@ function Task({ navigation, id }) {
 					}
 				]}
 			/>
-			<CustomBottomSheet
+			<BottomMenu
 				ref={refBottomSheet}
 				heading={"Move task to"}
 				data={[
 					[{ label: "My Tasks", Icon: props => <Feather name="check" {...props} /> }, { label: "Order List" }]
 				]}
 			/>
-		</>
+		</Screen>
 	)
 }
 

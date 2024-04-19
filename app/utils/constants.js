@@ -5,6 +5,7 @@ export const COLORS = {
 	DARK_MODAL: "#27282c",
 	DARK_MODAL_SECONDARY: "#1b1b1b",
 	DARK_HIGHLIGHT: "#343537",
+	DARK_BOTTOM_BG: "#1e1f21",
 	FONT_PRIMARY: "#dfdfdf",
 	FONT_HIGHLIGHT: "#c2c4c6",
 	FONT_LIGHT: "#b2b5b9",
