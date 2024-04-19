@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react"
+import React, { forwardRef, useCallback, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { MaterialCommunityIcons, MaterialIcons, Feather, Entypo } from "@expo/vector-icons"
 import { useStore } from "../store"
@@ -11,6 +11,7 @@ import CustomBottomSheet from "../components/CustomBottomSheet"
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet"
 import globalStyles from "../utils/globalStyles"
 import Screen from "../components/Screen"
+import { DateTimeModalWrapper } from "../components/DateTimeModal"
 
 function Home({ navigation }) {
 	const bottomBarData = useCallback(
@@ -37,39 +38,8 @@ function Home({ navigation }) {
 					{
 						label: "add",
 						Component: () => (
-							<ThemeButton style={styles.addIcon} borderRadius={15} onPress={() => addTaskRef.current.expand()}>
+							<ThemeButton style={styles.addIcon} borderRadius={15} onPress={() => newTaskRef.current.expand()}>
 								<MaterialIcons name="add" color={"#c3e7ff"} size={26} />
-							</ThemeButton>
-						)
-					}
-				]
-			},
-			newTask: {
-				leftSideData: [
-					{
-						label: "task-detail",
-						Icon: props => <MaterialCommunityIcons name="text" size={24} {...props} />,
-						action: () => null
-					},
-					{
-						label: "task-time",
-						Icon: props => <MaterialCommunityIcons name="clock-time-four-outline" size={24} {...props} />,
-						action: () => null
-					},
-					{
-						label: "task-star",
-						Icon: props => <MaterialCommunityIcons name="star-outline" size={24} {...props} />,
-						action: () => null
-					}
-				],
-				rightSideData: [
-					{
-						label: "task-add",
-						Component: () => (
-							<ThemeButton style={globalStyles.ractButton} rippleBordered>
-								<ThemeText style={globalStyles.ractButtonText} theme>
-									Save
-								</ThemeText>
 							</ThemeButton>
 						)
 					}
@@ -134,8 +104,9 @@ function Home({ navigation }) {
 	)()
 
 	const listNames = useStore(state => state.lists.map(({ _id, title }) => ({ _id, title })))
+	const [task, setTask] = useState()
 	const bottomMenuRef = useRef(null)
-	const addTaskRef = useRef(null)
+	const newTaskRef = useRef(null)
 
 	const [sheetDataIndex, setSheetDataIndex] = useState(null)
 
@@ -146,44 +117,111 @@ function Home({ navigation }) {
 
 	return (
 		<Screen>
-			<View style={styles.container}>
-				<View style={styles.headerWrapper}>
-					<ThemeText style={styles.header} center>
-						Tasks
-					</ThemeText>
-					<View style={styles.profile}>
-						<ThemeText style={styles.profileText}>J</ThemeText>
-					</View>
+			<View style={styles.headerWrapper}>
+				<ThemeText style={styles.header} center>
+					Tasks
+				</ThemeText>
+				<View style={styles.profile}>
+					<ThemeText style={styles.profileText}>J</ThemeText>
 				</View>
-				<Tabs navigate={screen => navigation.push(screen)} listNames={listNames} />
-				<BottomBar {...bottomBarData.home} />
-				<BottomMenu
-					ref={bottomMenuRef}
-					onClose={() => setSheetDataIndex(null)}
-					{...(sheetDataIndex !== null ? bottomSheetData[sheetDataIndex] : {})}
-				/>
+			</View>
+			<Tabs navigate={screen => navigation.push(screen)} listNames={listNames} />
+			<BottomBar {...bottomBarData.home} />
+			<BottomMenu
+				ref={bottomMenuRef}
+				onClose={() => setSheetDataIndex(null)}
+				{...(sheetDataIndex !== null ? bottomSheetData[sheetDataIndex] : {})}
+			/>
 
-				<CustomBottomSheet ref={addTaskRef}>
+			<CreateNewTask ref={newTaskRef} navigation={navigation} task={task} setTask={setTask} />
+		</Screen>
+	)
+}
+
+const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
+	return (
+		<>
+			<CustomBottomSheet ref={ref}>
+				<View style={{ marginHorizontal: 10 }}>
 					<BottomSheetTextInput
 						placeholder="New task"
 						style={{
+							fontSize: FONT.normal,
 							color: COLORS.FONT_PRIMARY,
 							paddingHorizontal: 15,
 							paddingVertical: 10
 						}}
 						placeholderTextColor={COLORS.FONT_PRIMARY}
+						value={task?.title}
+						onTextInput={str => setTask(prev => ({ ...prev, title: str }))}
 					/>
-					<BottomBar {...bottomBarData.newTask} overlay={false} />
-				</CustomBottomSheet>
-			</View>
-		</Screen>
+					{task?.details !== undefined && (
+						<BottomSheetTextInput
+							placeholder="Add details"
+							style={{
+								fontSize: FONT.small,
+								color: COLORS.FONT_PRIMARY,
+								paddingHorizontal: 15,
+								paddingBottom: 10,
+								paddingTop: 0
+							}}
+							placeholderTextColor={COLORS.FONT_PRIMARY}
+							value={task?.details}
+							onTextInput={str => setTask(prev => ({ ...prev, details: str }))}
+							multiline
+						/>
+					)}
+					<BottomBar
+						leftSideData={[
+							{
+								label: "task-detail",
+								Icon: props => <MaterialCommunityIcons name="text" size={24} {...props} />,
+								action: () => setTask(prev => ({ ...prev, details: "" }))
+							},
+							{
+								label: "task-time",
+								Icon: props => <MaterialCommunityIcons name="clock-time-four-outline" size={24} {...props} />,
+								action: () => setTask(prev => ({ ...prev, visible: true }))
+							},
+							{
+								label: "task-star",
+								Icon: () => (
+									<MaterialCommunityIcons
+										name={task?.starred ? "star" : "star-outline"}
+										size={24}
+										color={task?.starred ? COLORS.THEME : COLORS.FONT_PRIMARY}
+									/>
+								),
+								action: () => setTask(prev => ({ ...prev, starred: !prev.starred }))
+							}
+						]}
+						rightSideData={[
+							{
+								label: "task-add",
+								Component: () => (
+									<ThemeButton style={globalStyles.ractButton} rippleBordered>
+										<ThemeText style={globalStyles.ractButtonText} theme>
+											Save
+										</ThemeText>
+									</ThemeButton>
+								)
+							}
+						]}
+						overlay={false}
+					/>
+				</View>
+			</CustomBottomSheet>
+
+			<DateTimeModalWrapper
+				navigation={navigation}
+				visible={task?.visible}
+				close={() => setTask(prev => ({ ...prev, visible: false }))}
+			/>
+		</>
 	)
-}
+})
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1
-	},
 	headerWrapper: {
 		paddingVertical: 15,
 		paddingHorizontal: 20,

@@ -17,51 +17,45 @@ function ListTitle({ navigation }) {
 
 	return (
 		<Screen>
-			<View style={styles.container}>
-				<View style={[globalStyles.header, { justifyContent: "space-between" }]}>
-					<View
-						style={{
-							flexDirection: "row",
-							alignItems: "center",
-							gap: defaultHPadding
-						}}
+			<View style={[globalStyles.header, { justifyContent: "space-between" }]}>
+				<View
+					style={{
+						flexDirection: "row",
+						alignItems: "center",
+						gap: defaultHPadding
+					}}
+				>
+					<ThemeButton
+						onPress={() => navigation.goBack()}
+						rippleRadius={24}
+						_containerStyle={{ alignSelf: "center" }}
 					>
-						<ThemeButton
-							onPress={() => navigation.goBack()}
-							rippleRadius={24}
-							_containerStyle={{ alignSelf: "center" }}
-						>
-							<AntDesign name="close" color={COLORS.FONT_PRIMARY} size={FONT.xLarge} />
-						</ThemeButton>
-						<ThemeText style={{ fontSize: FONT.xLarge }}>Create new list</ThemeText>
-					</View>
+						<AntDesign name="close" color={COLORS.FONT_PRIMARY} size={FONT.xLarge} />
+					</ThemeButton>
+					<ThemeText style={{ fontSize: FONT.xLarge }}>Create new list</ThemeText>
+				</View>
 
-					{title?.length > 0 && (
-						<ThemeButton _containerStyle={{ alignSelf: "center" }} rippleDisabled onPress={addNewListWrapper}>
-							<ThemeText theme>Done</ThemeText>
-						</ThemeButton>
-					)}
-				</View>
-				<View style={styles.inputView}>
-					<TextInput
-						onChangeText={setTitle}
-						value={title}
-						style={styles.input}
-						placeholder="Enter list title"
-						placeholderTextColor={COLORS.FONT_LIGHT}
-						autoFocus={true}
-					/>
-				</View>
+				{title?.length > 0 && (
+					<ThemeButton _containerStyle={{ alignSelf: "center" }} rippleDisabled onPress={addNewListWrapper}>
+						<ThemeText theme>Done</ThemeText>
+					</ThemeButton>
+				)}
+			</View>
+			<View style={styles.inputView}>
+				<TextInput
+					onChangeText={setTitle}
+					value={title}
+					style={styles.input}
+					placeholder="Enter list title"
+					placeholderTextColor={COLORS.FONT_LIGHT}
+					autoFocus={true}
+				/>
 			</View>
 		</Screen>
 	)
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: COLORS.DARK_PRIMARY
-	},
 	inputView: {
 		paddingHorizontal: 18,
 		justifyContent: "center",

@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useRef, useState } from "react"
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
-import { COLORS, FONT, weekDays } from "../utils/constants"
+import { COLORS, FONT, getCalenderData, weekDays } from "../utils/constants"
 import { Entypo } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import globalStyles from "../utils/globalStyles"
@@ -9,6 +9,15 @@ import CustomModal, { hPadd, modalWidth } from "./CustomModal"
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons"
 
 const cardWidth = modalWidth
+let today = new Date()
+today = new Date(today.getTime() - today.getTimezoneOffset() * 60 * 1000)
+const currentDate = {
+	year: today.getFullYear(),
+	month: today.getMonth(),
+	date: today.getDate()
+}
+const calenderData = getCalenderData(today)
+
 const years = Array(201 / 3)
 	.fill()
 	.map((_, idx) => [1900 + idx * 3 + 0, 1900 + idx * 3 + 1, 1900 + idx * 3 + 2])
@@ -28,176 +37,14 @@ const months = [
 	"December"
 ]
 
-const calenderData = [
-	{
-		month: 0,
-		year: 2024,
-		daysInMonth: 31,
-		startDay: 1,
-		weeks: [
-			[null, 1, 2, 3, 4, 5, 6],
-			[7, 8, 9, 10, 11, 12, 13],
-			[14, 15, 16, 17, 18, 19, 20],
-			[21, 22, 23, 24, 25, 26, 27],
-			[28, 29, 30, 31, null, null, null]
-		]
-	},
-	{
-		month: 1,
-		year: 2024,
-		daysInMonth: 29,
-		startDay: 4,
-		weeks: [
-			[null, null, null, null, 1, 2, 3],
-			[4, 5, 6, 7, 8, 9, 10],
-			[11, 12, 13, 14, 15, 16, 17],
-			[18, 19, 20, 21, 22, 23, 24],
-			[25, 26, 27, 28, 29, null, null]
-		]
-	},
-	{
-		month: 2,
-		year: 2024,
-		daysInMonth: 31,
-		startDay: 5,
-		weeks: [
-			[null, null, null, null, null, 1, 2],
-			[3, 4, 5, 6, 7, 8, 9],
-			[10, 11, 12, 13, 14, 15, 16],
-			[17, 18, 19, 20, 21, 22, 23],
-			[24, 25, 26, 27, 28, 29, 30],
-			[31, null, null, null, null, null, null]
-		]
-	},
-	{
-		month: 3,
-		year: 2024,
-		daysInMonth: 30,
-		startDay: 1,
-		weeks: [
-			[null, 1, 2, 3, 4, 5, 6],
-			[7, 8, 9, 10, 11, 12, 13],
-			[14, 15, 16, 17, 18, 19, 20],
-			[21, 22, 23, 24, 25, 26, 27],
-			[28, 29, 30, null, null, null, null]
-		]
-	},
-	{
-		month: 4,
-		year: 2024,
-		daysInMonth: 31,
-		startDay: 3,
-		weeks: [
-			[null, null, null, 1, 2, 3, 4],
-			[5, 6, 7, 8, 9, 10, 11],
-			[12, 13, 14, 15, 16, 17, 18],
-			[19, 20, 21, 22, 23, 24, 25],
-			[26, 27, 28, 29, 30, 31, null]
-		]
-	},
-	{
-		month: 5,
-		year: 2024,
-		daysInMonth: 30,
-		startDay: 6,
-		weeks: [
-			[null, null, null, null, null, null, 1],
-			[2, 3, 4, 5, 6, 7, 8],
-			[9, 10, 11, 12, 13, 14, 15],
-			[16, 17, 18, 19, 20, 21, 22],
-			[23, 24, 25, 26, 27, 28, 29],
-			[30, null, null, null, null, null, null]
-		]
-	},
-	{
-		month: 6,
-		year: 2024,
-		daysInMonth: 31,
-		startDay: 1,
-		weeks: [
-			[null, 1, 2, 3, 4, 5, 6],
-			[7, 8, 9, 10, 11, 12, 13],
-			[14, 15, 16, 17, 18, 19, 20],
-			[21, 22, 23, 24, 25, 26, 27],
-			[28, 29, 30, 31, null, null, null]
-		]
-	},
-	{
-		month: 7,
-		year: 2024,
-		daysInMonth: 31,
-		startDay: 4,
-		weeks: [
-			[null, null, null, null, 1, 2, 3],
-			[4, 5, 6, 7, 8, 9, 10],
-			[11, 12, 13, 14, 15, 16, 17],
-			[18, 19, 20, 21, 22, 23, 24],
-			[25, 26, 27, 28, 29, 30, 31]
-		]
-	},
-	{
-		month: 8,
-		year: 2024,
-		daysInMonth: 30,
-		startDay: 7,
-		weeks: [
-			[1, 2, 3, 4, 5, 6, 7],
-			[8, 9, 10, 11, 12, 13, 14],
-			[15, 16, 17, 18, 19, 20, 21],
-			[22, 23, 24, 25, 26, 27, 28],
-			[29, 30, null, null, null, null, null]
-		]
-	},
-	{
-		month: 9,
-		year: 2024,
-		daysInMonth: 31,
-		startDay: 2,
-		weeks: [
-			[null, null, 1, 2, 3, 4, 5],
-			[6, 7, 8, 9, 10, 11, 12],
-			[13, 14, 15, 16, 17, 18, 19],
-			[20, 21, 22, 23, 24, 25, 26],
-			[27, 28, 29, 30, 31, null, null]
-		]
-	},
-	{
-		month: 10,
-		year: 2024,
-		daysInMonth: 30,
-		startDay: 5,
-		weeks: [
-			[null, null, null, null, null, 1, 2],
-			[3, 4, 5, 6, 7, 8, 9],
-			[10, 11, 12, 13, 14, 15, 16],
-			[17, 18, 19, 20, 21, 22, 23],
-			[24, 25, 26, 27, 28, 29, 30]
-		]
-	},
-	{
-		month: 11,
-		year: 2024,
-		daysInMonth: 31,
-		startDay: 7,
-		weeks: [
-			[1, 2, 3, 4, 5, 6, 7],
-			[8, 9, 10, 11, 12, 13, 14],
-			[15, 16, 17, 18, 19, 20, 21],
-			[22, 23, 24, 25, 26, 27, 28],
-			[29, 30, 31, null, null, null, null]
-		]
-	}
-]
-
 const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
-	const [selectedDate, setSelectedDate] = useState()
+	const [selectedDate, setSelectedDate] = useState(currentDate)
 	const [scrollPosition, setScrollPosition] = useState(0)
 	const [flags, setFlags] = useState({})
 	const listRef = useRef(null)
 
 	const startTime = performance.now()
 	const data = showComplete === 2 ? calenderData : calenderData?.slice(0, 1)
-	let month
 
 	const scrollToIndex = value =>
 		setScrollPosition(prev => {
@@ -223,6 +70,7 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 		console.log(`Calender took ${renderTime} seconds to render; Render Mode - ${showComplete}`)
 	})
 
+	const currentMonth = calenderData[scrollPosition]
 	return (
 		<View style={styles.calenderContainer}>
 			{!detailed ? (
@@ -324,7 +172,9 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 			>
 				{!detailed && (
 					<View>
-						<ThemeText style={styles.monthName}>{months[scrollPosition]} 2024</ThemeText>
+						<ThemeText style={styles.monthName}>
+							{months[currentMonth.month]} {currentMonth.year}
+						</ThemeText>
 					</View>
 				)}
 				<View>
@@ -340,13 +190,12 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 					<FlashList
 						ref={listRef}
 						data={data}
-						renderItem={({ item: i, index: month, extraData: selectedDate }) => (
+						renderItem={({ item: i, extraData }) => (
 							<MonthCalendar
-								key={`month-${month}`}
+								key={`${i.year}-${i.month}`}
 								monthData={i}
-								onDatePress={str => setSelectedDate(str)}
-								selectedDate={selectedDate}
-								month={month}
+								onDatePress={id => setSelectedDate(id)}
+								selectedDate={extraData}
 								detailed={detailed}
 							/>
 						)}
@@ -367,7 +216,7 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 							Cancel
 						</ThemeText>
 					</ThemeButton>
-					<ThemeButton style={styles.bottomBtn} borderRadius={50} onPress={submit}>
+					<ThemeButton style={styles.bottomBtn} borderRadius={50} onPress={() => submit(selectedDate)}>
 						<ThemeText style={{ fontSize: FONT.default }} theme>
 							OK
 						</ThemeText>
@@ -380,14 +229,14 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 
 const CalenderModal = props => {
 	return (
-		<CustomModal visible={true}>
+		<CustomModal visible={props.visible}>
 			<Calender {...props} detailed={true} />
 		</CustomModal>
 	)
 }
 
 const MonthCalendar = memo(
-	({ monthData, onDatePress, selectedDate, month, detailed }) => (
+	({ monthData, onDatePress, selectedDate, detailed }) => (
 		<View>
 			<View style={styles.table}>
 				{!detailed && (
@@ -401,20 +250,30 @@ const MonthCalendar = memo(
 				)}
 				<View style={{ height: cardWidth * 0.8 }}>
 					{monthData.weeks.map((days, week) => (
-						<View key={`${week}-${month}`} style={styles.tableRow}>
-							{days.map((date, idx) =>
-								date ? (
+						<View key={`${monthData.month}-${week}`} style={styles.tableRow}>
+							{days.map((date, idx) => {
+								if (!date) return <View key={`${monthData.month}-${idx}`} style={styles.cell} />
+								return (
 									<Text
-										key={`${month}-${date}`}
-										onPress={() => onDatePress(`${month}-${date}`)}
-										style={[styles.cell, selectedDate === `${month}-${date}` ? styles.selectedCell : null]}
+										key={`${monthData.month}-${date}`}
+										onPress={() => onDatePress({ year: monthData.year, month: monthData.month, date: date })}
+										style={[
+											{
+												...styles.cell,
+												color:
+													currentDate.month === monthData.month && currentDate.date === date
+														? COLORS.THEME
+														: COLORS.FONT_PRIMARY
+											},
+											selectedDate.month === monthData.month && selectedDate.date === date
+												? styles.selectedCell
+												: null
+										]}
 									>
 										{date}
 									</Text>
-								) : (
-									<View key={`${month}-${week}-${idx}`} style={styles.cell} />
 								)
-							)}
+							})}
 						</View>
 					))}
 				</View>
@@ -425,10 +284,12 @@ const MonthCalendar = memo(
 )
 
 function arePropsEqual(oldProps, newProps) {
-	return !(
-		(+newProps?.selectedDate?.split("-")?.[0] === oldProps.month ||
-			+oldProps?.selectedDate?.split("-")?.[0] === oldProps.month) &&
-		newProps?.selectedDate !== oldProps?.selectedDate
+	return (
+		(newProps.selectedDate.date === oldProps.selectedDate.date &&
+			newProps.selectedDate.month === oldProps.selectedDate.month &&
+			newProps.selectedDate.year === oldProps.selectedDate.year) ||
+		(newProps.selectedDate.month !== newProps.monthData.month &&
+			oldProps.selectedDate.month !== newProps.monthData.month)
 	)
 }
 

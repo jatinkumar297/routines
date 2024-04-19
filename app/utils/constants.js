@@ -41,3 +41,48 @@ export const FONT = {
 
 export const weekDays = ["S", "M", "T", "W", "T", "F", "S"]
 export const defaultHPadding = 18
+
+export const getCalenderData = today => {
+	const currentMonth = today.getMonth()
+	const currentYear = today.getFullYear()
+
+	let currentDate = new Date([currentYear, currentMonth + 1, "01"].join("-"))
+	currentDate = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60 * 1000 * 2)
+
+	const currentMonthFirstDay = currentDate.getUTCDay()
+
+	const calendar = []
+	const months = [31, currentYear % 4 ? 28 : 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+	for (let i = 0; i < 12; i++) {
+		const month = (currentMonth + i + 12) % 12
+		const year = currentYear + (currentMonth + i >= 12 ? 1 : 0)
+
+		const monthData = {
+			month: month,
+			year,
+			daysInMonth: months[month],
+			startDay:
+				month === currentMonth
+					? currentMonthFirstDay
+					: (months.slice(0, month)?.reduce((a, b) => a + b, 0) % 7, 0) + 1
+		}
+
+		monthData.weeks = Array(6)
+			.fill()
+			.map((_, week) =>
+				Array(7)
+					.fill()
+					.map((_, day) => {
+						const date = 7 * week + day - monthData.startDay + 1
+						if ((week === 0 && day < monthData.startDay) || date > monthData.daysInMonth) return null
+						else return date
+					})
+			)
+			?.filter(i => i.some(_i => _i))
+
+		calendar.push(monthData)
+	}
+
+	return calendar
+}

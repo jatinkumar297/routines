@@ -15,7 +15,7 @@ const BottomBar = ({ leftSideData, rightSideData, overlay = true }) => {
 							style={{ padding: 12 }}
 							_containerStyle={{ alignSelf: "center" }}
 							rippleRadius={20}
-							onPress={action}
+							onPress={() => action()}
 						>
 							<Icon color={COLORS.FONT_PRIMARY} />
 						</ThemeButton>

@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react"
-import { StyleSheet } from "react-native"
+import { StyleSheet, View } from "react-native"
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet"
 import { COLORS } from "../utils/constants"
 
@@ -19,7 +19,10 @@ const CustomBottomSheet = forwardRef(({ children }, ref) => {
 			backgroundStyle={styles.backgroundStyle}
 			enableOverDrag={false}
 		>
-			<BottomSheetView style={styles.container}>{children}</BottomSheetView>
+			<BottomSheetView style={styles.container}>
+				<View style={{ paddingTop: 12 }} />
+				{children}
+			</BottomSheetView>
 		</BottomSheet>
 	)
 })
@@ -31,7 +34,6 @@ const styles = StyleSheet.create({
 		borderTopRightRadius: 35
 	},
 	container: {
-		paddingTop: 12,
 		paddingBottom: 15,
 		height: "auto"
 	}

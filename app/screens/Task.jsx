@@ -3,14 +3,12 @@ import { View, TextInput, StyleSheet, Animated, Dimensions, StatusBar, Touchable
 import { COLORS, FONT, defaultHPadding } from "../utils/constants"
 import globalStyles from "../utils/globalStyles"
 import { ThemeButton, ThemeText } from "../components/ThemeComponents"
-import { Ionicons, AntDesign, MaterialCommunityIcons, MaterialIcons, Feather } from "@expo/vector-icons"
+import { Ionicons, AntDesign, MaterialCommunityIcons, Feather } from "@expo/vector-icons"
 import TimeInput from "../components/TimeInput"
-import DateTimeModal from "../components/DateTimeModal"
 import BottomBar from "../components/BottomBar"
 import BottomMenu from "../components/BottomMenu"
 import Screen from "../components/Screen"
-
-const wHeight = Dimensions.get("window").height
+import { DateTimeModalWrapper } from "../components/DateTimeModal"
 
 function Task({ navigation, id }) {
 	const refBottomSheet = useRef()
@@ -22,33 +20,7 @@ function Task({ navigation, id }) {
 			"This is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test."
 	})
 
-	const translateY = useRef(new Animated.Value(wHeight)).current
 	const setData = data => setTask(prev => ({ ...prev, ...data }))
-
-	const showModal = () => {
-		setTimeout(
-			() =>
-				Animated.timing(translateY, {
-					toValue: StatusBar.currentHeight / 2,
-					duration: 500,
-					useNativeDriver: true
-				}).start(),
-			0
-		)
-		setDateTimeModal({ active: true })
-	}
-
-	const closeModal = () => {
-		Animated.timing(translateY, {
-			toValue: wHeight,
-			duration: 250,
-			useNativeDriver: true
-		}).start()
-
-		setTimeout(() => {
-			setDateTimeModal()
-		}, 125)
-	}
 
 	return (
 		<Screen>
@@ -82,31 +54,16 @@ function Task({ navigation, id }) {
 
 				<View style={styles.inputWrapper}>
 					<MaterialCommunityIcons name="clock-time-four-outline" style={globalStyles.icon} />
-					<TimeInput onPress={showModal} advanced />
+					<TimeInput onPress={() => setDateTimeModal({ visible: true })} advanced />
 				</View>
 			</View>
 
-			<View
-				style={{
-					...StyleSheet.absoluteFillObject,
-					backgroundColor: COLORS.OVERLAY,
-					opacity: dateTimeModal?.active ? 1 : 0,
-					pointerEvents: dateTimeModal?.active ? "auto" : "none"
-				}}
-			>
-				<Animated.View
-					style={[
-						{
-							...StyleSheet.absoluteFillObject,
-							alignItems: "center",
-							justifyContent: "center"
-						},
-						{ transform: [{ translateY: translateY }] }
-					]}
-				>
-					<DateTimeModal navigation={navigation} visible={dateTimeModal?.active} close={closeModal} />
-				</Animated.View>
-			</View>
+			<DateTimeModalWrapper
+				navigation={navigation}
+				visible={dateTimeModal?.visible}
+				close={() => setDateTimeModal()}
+			/>
+
 			<BottomBar
 				rightSideData={[
 					{

@@ -4,7 +4,7 @@ import CustomBottomSheet from "./CustomBottomSheet"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
 import { COLORS, FONT } from "../utils/constants"
 
-const BottomMenu = forwardRef(({ componentKey, heading, data, iconHidden, onClose }, ref) => {
+const BottomMenu = forwardRef(({ componentKey, heading, data, iconHidden }, ref) => {
 	return (
 		<CustomBottomSheet ref={ref}>
 			{Boolean(heading) ? (
