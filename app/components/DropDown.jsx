@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from "react-native"
 import React from "react"
-import { COLORS } from "../utils/constants"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
 
-const DropDown = ({ data }) => {
+const DropDown = ({ data, onSelect }) => {
 	return (
 		<View style={styles.dropdownContainer}>
 			{data?.map(i => (
 				<ThemeButton
 					_containerStyle={{ width: "100%" }}
+					onPress={() => onSelect(i.value)}
 					style={{
 						width: "100%",
 						paddingHorizontal: 10,
@@ -16,7 +16,6 @@ const DropDown = ({ data }) => {
 					}}
 					rippleBordered
 					key={i.label}
-					onPress={() => i?.action?.(i.value)}
 				>
 					<ThemeText>{i.label}</ThemeText>
 				</ThemeButton>

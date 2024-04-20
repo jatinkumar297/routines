@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useRef, useState } from "react"
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
-import { COLORS, FONT, getCalenderData, weekDays } from "../utils/constants"
+import { COLORS, FONT, currentDate, getCalenderData, months, weekDays } from "../utils/constants"
 import { Entypo } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import globalStyles from "../utils/globalStyles"
@@ -9,36 +9,13 @@ import CustomModal, { hPadd, modalWidth } from "./CustomModal"
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons"
 
 const cardWidth = modalWidth
-let today = new Date()
-today = new Date(today.getTime() - today.getTimezoneOffset() * 60 * 1000)
-const currentDate = {
-	year: today.getFullYear(),
-	month: today.getMonth(),
-	date: today.getDate()
-}
-const calenderData = getCalenderData(today)
-
 const years = Array(201 / 3)
 	.fill()
 	.map((_, idx) => [1900 + idx * 3 + 0, 1900 + idx * 3 + 1, 1900 + idx * 3 + 2])
 
-const months = [
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December"
-]
-
-const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
-	const [selectedDate, setSelectedDate] = useState(currentDate)
+const calenderData = getCalenderData()
+const Calender = ({ showComplete, detailed = false, defaultDate, updateDate, label, close, submit }) => {
+	const [selectedDate, setSelectedDate] = useState(defaultDate || currentDate)
 	const [scrollPosition, setScrollPosition] = useState(0)
 	const [flags, setFlags] = useState({})
 	const listRef = useRef(null)
@@ -65,12 +42,15 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 		})
 
 	useEffect(() => {
+		updateDate?.(selectedDate)
 		const endTime = performance.now()
 		const renderTime = Math.ceil(endTime - startTime) / 1000
 		console.log(`Calender took ${renderTime} seconds to render; Render Mode - ${showComplete}`)
 	})
 
-	const currentMonth = calenderData[scrollPosition]
+	const currentMonth = calenderData[scrollPosition]?.month
+	const currentYear = calenderData[scrollPosition]?.year
+
 	return (
 		<View style={styles.calenderContainer}>
 			{!detailed ? (
@@ -173,7 +153,7 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 				{!detailed && (
 					<View>
 						<ThemeText style={styles.monthName}>
-							{months[currentMonth.month]} {currentMonth.year}
+							{months[currentMonth]} {currentYear}
 						</ThemeText>
 					</View>
 				)}
@@ -203,7 +183,7 @@ const Calender = ({ showComplete, detailed = false, label, close, submit }) => {
 						estimatedItemSize={5}
 						horizontal
 						pagingEnabled
-						onMomentumScrollEnd={e => setScrollPosition(Math.floor(e.nativeEvent.contentOffset.x / cardWidth))}
+						onMomentumScrollEnd={e => setScrollPosition(Math.ceil(e.nativeEvent.contentOffset.x / cardWidth))}
 						showsHorizontalScrollIndicator={false}
 					/>
 				</View>
@@ -250,12 +230,12 @@ const MonthCalendar = memo(
 				)}
 				<View style={{ height: cardWidth * 0.8 }}>
 					{monthData.weeks.map((days, week) => (
-						<View key={`${monthData.month}-${week}`} style={styles.tableRow}>
+						<View key={week + "week" + monthData.month} style={styles.tableRow}>
 							{days.map((date, idx) => {
-								if (!date) return <View key={`${monthData.month}-${idx}`} style={styles.cell} />
+								if (!date) return <View key={idx + "nothing" + monthData.month} style={styles.cell} />
 								return (
 									<Text
-										key={`${monthData.month}-${date}`}
+										key={date + "date" + monthData.month}
 										onPress={() => onDatePress({ year: monthData.year, month: monthData.month, date: date })}
 										style={[
 											{

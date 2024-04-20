@@ -1,3 +1,5 @@
+export const defaultHPadding = 18
+
 export const COLORS = {
 	HIGHLIGHT_THEME: "#313743",
 	DARK_PRIMARY: "#121212",
@@ -39,10 +41,35 @@ export const FONT = {
 	xxSmall: 10
 }
 
-export const weekDays = ["S", "M", "T", "W", "T", "F", "S"]
-export const defaultHPadding = 18
+let today = new Date()
+today = new Date(today.getTime() - today.getTimezoneOffset() * 60 * 1000)
 
-export const getCalenderData = today => {
+export const currentDate = {
+	year: today.getFullYear(),
+	month: today.getMonth(),
+	date: today.getDate()
+}
+
+export const weekFullDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+export const weekDays = weekFullDays.map(i => i[0])
+
+export const months = [
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December"
+]
+
+export const getCalenderData = () => {
 	const currentMonth = today.getMonth()
 	const currentYear = today.getFullYear()
 
@@ -52,7 +79,8 @@ export const getCalenderData = today => {
 	const currentMonthFirstDay = currentDate.getUTCDay()
 
 	const calendar = []
-	const months = [31, currentYear % 4 ? 28 : 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+	const nextYearMonths = [31, (currentYear + 1) % 4 ? 28 : 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+	const months = [31, currentYear % 4 ? 28 : 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31].concat(nextYearMonths)
 
 	for (let i = 0; i < 12; i++) {
 		const month = (currentMonth + i + 12) % 12
@@ -65,7 +93,7 @@ export const getCalenderData = today => {
 			startDay:
 				month === currentMonth
 					? currentMonthFirstDay
-					: (months.slice(0, month)?.reduce((a, b) => a + b, 0) % 7, 0) + 1
+					: (months.slice(currentMonth, currentMonth + i)?.reduce((a, b) => a + b, 0) % 7) + 1
 		}
 
 		monthData.weeks = Array(6)

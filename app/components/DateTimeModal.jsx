@@ -8,10 +8,12 @@ import globalStyles from "../utils/globalStyles"
 import ClockModal from "./ClockModal"
 import { Calender } from "./Calender"
 import { hPadd, modalWidth } from "./CustomModal"
+import TimeInput from "./TimeInput"
 const wHeight = Dimensions.get("window").height
 
 export const DateTimeModal = ({ navigation, visible = false, close, onSubmit }) => {
-	const [data, setData] = useState({ date: null, time: null, repeats: null })
+	const dateSelection = useRef(null)
+	const [data, setData] = useState({ time: null, repeats: null })
 	const [showCalender, setShowCalender] = useState()
 	const [showClock, setShowClock] = useState()
 
@@ -22,11 +24,21 @@ export const DateTimeModal = ({ navigation, visible = false, close, onSubmit }) 
 
 	return (
 		<View style={styles.modal}>
-			{showCalender > 0 && <Calender showComplete={showCalender} />}
+			{showCalender > 0 && (
+				<Calender
+					showComplete={showCalender}
+					defaultDate={dateSelection.current}
+					updateDate={date => (dateSelection.current = date)}
+				/>
+			)}
 			<TouchableHighlight onPress={() => setShowClock(true)} underlayColor={COLORS.DARK_HIGHLIGHT}>
 				<View style={[styles.buttonWrapper, { borderTopWidth: StyleSheet.hairlineWidth }]}>
 					<MaterialCommunityIcons name="clock-time-four-outline" style={[globalStyles.icon, styles.buttonIcon]} />
-					<ThemeText>Set time</ThemeText>
+					{data?.time ? (
+						<TimeInput time={data.time} remove={() => setData(prev => ({ ...prev, time: null }))} advanced />
+					) : (
+						<ThemeText>Set time</ThemeText>
+					)}
 				</View>
 			</TouchableHighlight>
 			<TouchableHighlight onPress={() => navigation.push("repeats")} underlayColor={COLORS.DARK_HIGHLIGHT}>
@@ -48,7 +60,14 @@ export const DateTimeModal = ({ navigation, visible = false, close, onSubmit }) 
 					</ThemeText>
 				</ThemeButton>
 			</View>
-			<ClockModal visible={showClock} close={() => setShowClock(false)} />
+			<ClockModal
+				visible={showClock}
+				close={() => setShowClock(false)}
+				submit={time => {
+					setData(prev => ({ ...prev, time }))
+					setShowClock(false)
+				}}
+			/>
 		</View>
 	)
 }

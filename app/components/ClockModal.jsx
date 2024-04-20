@@ -70,7 +70,7 @@ const ClockModal = ({ visible = false, close, submit }) => {
 					</View>
 				</View>
 
-				{!inputState && <Clock clockState={clockState} setClockState={setClockState} />}
+				{!inputState && <Analog clockState={clockState} setClockState={setClockState} />}
 			</View>
 			<View style={styles.bottomBtnsContainer}>
 				<View style={{ marginLeft: 15 }}>
@@ -153,25 +153,33 @@ const DigitalClockLabel = ({ label, value, inputState, clockState, setClockState
 	</View>
 )
 
-const Clock = memo(
+let lastAngle = 0
+const Analog = memo(
 	({ clockState, setClockState }) => {
 		const handRef = useRef(null)
 		const [origin, setOrigin] = useState({ x: 0, y: 0 })
 		const rotation = useRef(new Animated.Value(0)).current
 
 		useEffect(() => {
-			const toValue =
+			const newAngle = Math.abs(
 				clockState?.mode === 0
 					? ((+clockState?.hours + 12) % 12) * 30
 					: clockState?.mode === 1
 					? +clockState?.minutes * 6
 					: null
+			)
+
+			let deltaAngle1 = Math.abs(lastAngle - newAngle)
+			let deltaAngle2 = Math.abs(lastAngle - Math.abs(360 - newAngle))
+			const angle = deltaAngle1 < deltaAngle2 ? newAngle : Math.abs(newAngle - 360)
+
 			Animated.timing(rotation, {
-				toValue,
-				duration: 300,
+				toValue: newAngle,
 				easing: Easing.linear,
-				useNativeDriver: false
+				useNativeDriver: true
 			}).start()
+
+			lastAngle = newAngle
 		}, [clockState])
 
 		useEffect(() => {
@@ -200,13 +208,11 @@ const Clock = memo(
 				angle = onFinish ? Math.round(angle / 6) * 6 : Math.round(angle)
 				setClockState(prev => ({
 					...prev,
-					minutes: Math.round(angle / 6)
-						.toString()
-						.padStart(2, "0")
+					minutes: (Math.round(angle / 6) % 60).toString().padStart(2, "0")
 				}))
 			}
 
-			rotation.setValue(+angle.toPrecision(6))
+			rotation.setValue(angle)
 		}
 
 		const panResponder = PanResponder.create({

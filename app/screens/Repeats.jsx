@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { StyleSheet, View, TextInput, Text, Pressable } from "react-native"
-import { COLORS, FONT, weekDays } from "../utils/constants"
+import { COLORS, FONT, currentDate, months, weekDays, weekFullDays } from "../utils/constants"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import { Ionicons } from "@expo/vector-icons"
 import { Feather } from "@expo/vector-icons"
@@ -11,11 +11,34 @@ import ClockModal from "../components/ClockModal"
 import DropDown from "../components/DropDown"
 import Screen from "../components/Screen"
 
+const dropDownOptions = {
+	intervalUnit: ["day", "week", "month", "year"].map(i => ({ label: i, value: i })),
+	dates: Array(32)
+		.fill()
+		.map((_, idx) =>
+			idx === 31
+				? { label: "Last day", value: -1 }
+				: {
+						label: "Day " + (idx + 1),
+						value: idx + 1
+				  }
+		),
+	weeks: ["First", "Second", "Third", "Fourth", "Last"].map((label, value) => ({ label, value: value + 1 })),
+	weekDays: weekFullDays.map((label, value) => ({ label, value: value + 1 }))
+}
+
 const Repeats = ({ navigation }) => {
-	const [data, setData] = useState({})
+	const [data, setData] = useState({
+		every: {
+			cycleInterval: 1,
+			intervalUnit: dropDownOptions.intervalUnit[1].value
+		}
+	})
 	const [clockState, setClockState] = useState()
 	const [calenderState, setCalenderState] = useState()
 	const [dropDownState, setDropDownState] = useState()
+
+	console.log(data)
 
 	const handleData = (field, subfield, value) => {
 		setData(prev => ({
@@ -33,11 +56,13 @@ const Repeats = ({ navigation }) => {
 			...prev,
 			every: {
 				...(prev.every || {}),
-				week_day: (prev?.every?.week_day || [])?.includes(idx)
-					? (prev?.every?.week_day || [])?.filter(_i => _i !== idx)
-					: (prev?.every?.week_day || [])?.concat([idx])
+				weekDays: (prev?.every?.weekDays || [])?.includes(idx)
+					? (prev?.every?.weekDays || [])?.filter(_i => _i !== idx)
+					: (prev?.every?.weekDays || [])?.concat([idx])
 			}
 		}))
+
+	const getLabel = (value, optionsLabel) => dropDownOptions[optionsLabel].find(i => i.value === value).label
 
 	return (
 		<Screen>
@@ -72,41 +97,139 @@ const Repeats = ({ navigation }) => {
 					<TextInput
 						style={[styles.inputRect, { textAlign: "center" }]}
 						placeholderTextColor={COLORS.FONT_PRIMARY}
-						placeholder="1"
-						value={data?.every?.cycle_length}
-						onChangeText={text => handleData("every", "cycle_length", text)}
+						keyboardType="numeric"
+						maxLength={2}
+						value={data?.every?.cycleInterval}
+						defaultValue={"1"}
+						onChangeText={text => handleData("every", "cycleInterval", (+text || 1).toString())}
 					/>
 					<View style={{ flexGrow: 1, position: "relative" }}>
 						<Pressable
 							style={[styles.inputRect, { flexGrow: 1, flexDirection: "row", alignItems: "center" }]}
-							onPress={() => setDropDownState(prev => !prev)}
+							onPress={() => setDropDownState(prev => (prev === 1 ? null : 1))}
 						>
-							<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }}>week</ThemeText>
+							<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }}>
+								{getLabel(data?.every?.intervalUnit, "intervalUnit")}
+							</ThemeText>
 							<AntDesign name="caretdown" style={[globalStyles.icon, { fontSize: FONT.xxSmall }]} />
 						</Pressable>
-						{dropDownState && (
-							<DropDown data={[{ label: "day" }, { label: "week" }, { label: "month" }, { label: "year" }]} />
+						{dropDownState === 1 && (
+							<DropDown
+								data={dropDownOptions.intervalUnit}
+								onSelect={i => {
+									handleData("every", "intervalUnit", i)
+									setDropDownState()
+								}}
+							/>
 						)}
 					</View>
 				</View>
-				<View style={{ flexDirection: "row", gap: 10, justifyContent: "space-between", marginVertical: 14 }}>
-					{weekDays.map((i, idx) => (
-						<Pressable
-							key={i + idx}
-							style={[styles.weekDay, data?.every?.week_day?.includes(idx) ? styles.selectedWeekDay : {}]}
-							onPress={() => handleWeekDay(idx)}
-						>
-							<ThemeText style={data?.every?.week_day?.includes(idx) ? { color: COLORS.THEME_DARK } : null}>
-								{i}
-							</ThemeText>
-						</Pressable>
-					))}
-				</View>
-				<ThemeText
-					style={styles.inputRect}
-					children={"Set time"}
+				{data.every.intervalUnit === "week" ? (
+					<View style={{ flexDirection: "row", gap: 8, justifyContent: "space-between", marginTop: 14 }}>
+						{weekDays.map((i, idx) => (
+							<Pressable
+								key={i + idx}
+								style={[styles.weekDay, data?.every?.weekDays?.includes(idx) ? styles.selectedWeekDay : {}]}
+								onPress={() => handleWeekDay(idx)}
+							>
+								<ThemeText style={data?.every?.weekDays?.includes(idx) ? { color: COLORS.THEME_DARK } : null}>
+									{i}
+								</ThemeText>
+							</Pressable>
+						))}
+					</View>
+				) : data.every.intervalUnit === "month" ? (
+					<View style={{ marginTop: 14, gap: 14 }}>
+						<View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
+							<Feather name="circle" size={FONT.xLarge} color={COLORS.FONT_PRIMARY} />
+							<View style={{ flexGrow: 1, position: "relative" }}>
+								<Pressable
+									style={[styles.inputRect, { flexGrow: 1, flexDirection: "row", alignItems: "center" }]}
+									onPress={() => setDropDownState(prev => (prev === 2 ? null : 2))}
+								>
+									<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }}>
+										{getLabel(data?.every?.date, "dates")}
+									</ThemeText>
+									<AntDesign name="caretdown" style={[globalStyles.icon, { fontSize: FONT.xxSmall }]} />
+								</Pressable>
+								{dropDownState === 2 && (
+									<DropDown
+										data={dropDownOptions.dates}
+										onSelect={i => {
+											handleData("every", "date", i)
+											setDropDownState()
+										}}
+									/>
+								)}
+							</View>
+						</View>
+						<View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
+							<Feather name="circle" size={FONT.xLarge} color={COLORS.FONT_PRIMARY} />
+							<View style={{ flexDirection: "row", gap: 10 }}>
+								<View style={{ width: 120, position: "relative" }}>
+									<Pressable
+										style={[styles.inputRect, { flexGrow: 1, flexDirection: "row", alignItems: "center" }]}
+										onPress={() => setDropDownState(prev => (prev === 3 ? null : 3))}
+									>
+										<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }}>
+											{getLabel(data?.every?.week, "weeks")}
+										</ThemeText>
+										<AntDesign name="caretdown" style={[globalStyles.icon, { fontSize: FONT.xxSmall }]} />
+									</Pressable>
+									{dropDownState === 3 && (
+										<DropDown
+											data={dropDownOptions.weeks}
+											onSelect={i => {
+												handleData("every", "week", i)
+												setDropDownState()
+											}}
+										/>
+									)}
+								</View>
+								<View style={{ width: 152, position: "relative" }}>
+									<Pressable
+										style={[styles.inputRect, { flexGrow: 1, flexDirection: "row", alignItems: "center" }]}
+										onPress={() => setDropDownState(prev => (prev === 4 ? null : 4))}
+									>
+										<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }}>
+											{getLabel(data?.every?.day, "weekDays")?.slice(0, 3)}
+										</ThemeText>
+										<AntDesign name="caretdown" style={[globalStyles.icon, { fontSize: FONT.xxSmall }]} />
+									</Pressable>
+									{dropDownState === 4 && (
+										<DropDown
+											data={dropDownOptions.weekDays}
+											onSelect={i => {
+												handleData("every", "day", i)
+												setDropDownState()
+											}}
+										/>
+									)}
+								</View>
+							</View>
+						</View>
+					</View>
+				) : null}
+				<Pressable
+					style={[styles.inputRect, { flexGrow: 1, flexDirection: "row", alignItems: "center", marginTop: 14 }]}
 					onPress={() => setClockState({ field: "every", subfield: "time" })}
-				/>
+				>
+					<ThemeText style={{ flexGrow: 1, fontSize: FONT.medium }}>
+						{data?.every?.time
+							? `${data?.every.time.hours}:${data?.every.time.minutes} ${data?.every.time.indicator ? "pm" : "am"}`
+							: "Set time"}
+					</ThemeText>
+					{data?.every?.time && (
+						<AntDesign
+							name="close"
+							style={[globalStyles.icon, { fontSize: FONT.large }]}
+							onPress={e => {
+								e.stopPropagation()
+								handleData("every", "time", null)
+							}}
+						/>
+					)}
+				</Pressable>
 			</View>
 
 			<View style={styles.divider} />
@@ -114,8 +237,14 @@ const Repeats = ({ navigation }) => {
 				<ThemeText style={{ fontWeight: "600", marginBottom: 15 }}>Starts</ThemeText>
 				<ThemeText
 					style={styles.inputRect}
-					children={"16 January"}
-					onPress={() => setCalenderState({ field: "starts", label: "Start Date" })}
+					children={
+						data?.starts?.date
+							? `${data?.starts?.date?.date} ${months[data?.starts?.date?.month]}${
+									data?.starts?.date?.year === currentDate.year ? "" : " " + data?.starts?.date?.year
+							  }`
+							: "N/A"
+					}
+					onPress={() => setCalenderState({ field: "starts", subfield: "date", label: "Start Date" })}
 				/>
 			</View>
 			<View style={styles.divider} />
@@ -124,7 +253,9 @@ const Repeats = ({ navigation }) => {
 				<View style={{ gap: 12 }}>
 					<View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
 						<Feather name="circle" size={FONT.xLarge} color={COLORS.FONT_PRIMARY} />
-						<ThemeText style={{ width: 45 }}>Never</ThemeText>
+						<ThemeText style={{ width: 45 }} onPress={() => handleData("ends", "never", true)}>
+							Never
+						</ThemeText>
 						<TextInput style={[styles.inputRect, { opacity: 0 }]} editable={false} />
 					</View>
 					<View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
@@ -132,8 +263,14 @@ const Repeats = ({ navigation }) => {
 						<ThemeText style={{ width: 45 }}>On</ThemeText>
 						<ThemeText
 							style={[styles.inputRect, { flexGrow: 1 }]}
-							children={"16 January"}
-							onPress={() => setCalenderState({ field: "ends", label: "End Date" })}
+							children={
+								data?.ends?.on
+									? `${data?.ends?.on?.date} ${months[data?.ends?.on?.month]}${
+											+data?.ends?.on?.year === +currentDate.year ? "" : " " + data?.starts?.date?.year
+									  }`
+									: "N/A"
+							}
+							onPress={() => setCalenderState({ field: "ends", subfield: "on", label: "End Date" })}
 						/>
 					</View>
 					<View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
@@ -142,7 +279,10 @@ const Repeats = ({ navigation }) => {
 						<TextInput
 							style={[styles.inputRect, { textAlign: "center" }]}
 							placeholderTextColor={COLORS.FONT_PRIMARY}
-							placeholder="13"
+							value={data?.ends?.after}
+							onChangeText={text => handleData("ends", "after", text.toString())}
+							keyboardType="numeric"
+							maxLength={3}
 						/>
 						<ThemeText>occurrences</ThemeText>
 					</View>
@@ -160,7 +300,10 @@ const Repeats = ({ navigation }) => {
 				visible={!!calenderState}
 				showComplete={2}
 				label={calenderState?.label}
-				submit={() => setCalenderState()}
+				submit={date => {
+					handleData(calenderState.field, calenderState.subfield, date)
+					setCalenderState()
+				}}
 				close={() => setCalenderState()}
 			/>
 		</Screen>
