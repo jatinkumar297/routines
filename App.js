@@ -33,7 +33,6 @@ export default function App() {
 							<Stack.Screen name="home" component={Home} />
 							<Stack.Screen name="task" component={Task} />
 							<Stack.Screen name="list-title" component={ListTitle} options={{ animation: "fade_from_bottom" }} />
-							<Stack.Screen name="repeats" component={Repeats} options={{ animation: "fade_from_bottom" }} />
 						</Stack.Navigator>
 					</NavigationContainer>
 				</MasterState>

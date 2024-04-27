@@ -5,8 +5,9 @@ import { COLORS, FONT, currentDate, getCalenderData, months, weekDays } from "..
 import { Entypo } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import globalStyles from "../utils/globalStyles"
-import CustomModal, { hPadd, modalWidth } from "./CustomModal"
+import { hPadd, modalWidth } from "./ThemeModal"
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons"
+import CustomModal from "./CustomModal"
 
 const cardWidth = modalWidth
 const years = Array(201 / 3)
@@ -14,51 +15,67 @@ const years = Array(201 / 3)
 	.map((_, idx) => [1900 + idx * 3 + 0, 1900 + idx * 3 + 1, 1900 + idx * 3 + 2])
 
 const calenderData = getCalenderData()
-const Calender = ({ showComplete, detailed = false, defaultDate, updateDate, label, close, submit }) => {
-	const [selectedDate, setSelectedDate] = useState(defaultDate || currentDate)
+export const Calender = ({ visible, detailed = false, defaultDate, updateDate, label, close, submit }) => {
+	const [renderMode, setRenderMode] = useState(0)
 	const [scrollPosition, setScrollPosition] = useState(0)
+	const [selectedDate, setSelectedDate] = useState(defaultDate || currentDate)
 	const [flags, setFlags] = useState({})
 	const listRef = useRef(null)
 
 	const startTime = performance.now()
-	const data = showComplete === 2 ? calenderData : calenderData?.slice(0, 1)
+	const data = !renderMode ? null : renderMode === 2 ? calenderData : calenderData?.slice(0, 1)
 
-	const scrollToIndex = value =>
-		setScrollPosition(prev => {
-			const nextIdx = prev + value
-			let return_value = nextIdx
+	const scrollToIndex = nextIdx => {
+		if (nextIdx < 0 || nextIdx >= calenderData?.length) return
 
-			if (nextIdx < 0 || nextIdx >= data?.length) {
-				return_value = prev
-			} else {
-				listRef.current.scrollToIndex({
-					index: nextIdx,
-					animated: true,
-					viewPosition: 0.5
-				})
-			}
-
-			return return_value
+		setScrollPosition(nextIdx)
+		listRef.current.scrollToIndex({
+			index: nextIdx,
+			animated: true,
+			viewPosition: 0.5
 		})
+	}
+
+	useEffect(() => {
+		if (visible && defaultDate) {
+			scrollToIndex(defaultDate?.month - data[0].month)
+			if (JSON.stringify(defaultDate) !== JSON.stringify(selectedDate)) setSelectedDate(defaultDate)
+		}
+	}, [renderMode, defaultDate])
+
+	useEffect(() => {
+		if (visible) setTimeout(() => setRenderMode(2), 350)
+		else {
+			setScrollPosition(0)
+			setRenderMode(1)
+		}
+	}, [visible])
 
 	useEffect(() => {
 		updateDate?.(selectedDate)
 		const endTime = performance.now()
 		const renderTime = Math.ceil(endTime - startTime) / 1000
-		console.log(`Calender took ${renderTime} seconds to render; Render Mode - ${showComplete}`)
+		console.log(`Calender took ${renderTime} seconds to render; Render Mode - ${renderMode}`)
 	})
 
-	const currentMonth = calenderData[scrollPosition]?.month
-	const currentYear = calenderData[scrollPosition]?.year
-
+	const selectedMonth = calenderData[scrollPosition]
+	if (!renderMode) return null
 	return (
 		<View style={styles.calenderContainer}>
 			{!detailed ? (
 				<View style={styles.navBtnsWrapper}>
-					<ThemeButton style={styles.navButton} rippleRadius={34} onPress={() => scrollToIndex(-1)}>
+					<ThemeButton
+						style={styles.navButton}
+						rippleRadius={34}
+						onPress={() => scrollToIndex(scrollPosition - 1)}
+					>
 						<Entypo name="chevron-left" style={[globalStyles.icon, { fontSize: FONT.large, marginRight: 1 }]} />
 					</ThemeButton>
-					<ThemeButton style={styles.navButton} rippleRadius={34} onPress={() => scrollToIndex(1)}>
+					<ThemeButton
+						style={styles.navButton}
+						rippleRadius={34}
+						onPress={() => scrollToIndex(scrollPosition + 1)}
+					>
 						<Entypo name="chevron-right" style={[globalStyles.icon, { fontSize: FONT.large, marginLeft: 1 }]} />
 					</ThemeButton>
 				</View>
@@ -66,7 +83,9 @@ const Calender = ({ showComplete, detailed = false, defaultDate, updateDate, lab
 				<>
 					<ThemeText style={{ fontSize: FONT.xSmall, fontWeight: 700 }}>{label}</ThemeText>
 					<View style={styles.calenderHeaderContainer}>
-						<ThemeText style={{ fontSize: 32 }}>12 Apr 2024</ThemeText>
+						<ThemeText style={{ fontSize: 32 }}>
+							{selectedDate?.date} {months?.[selectedDate?.month]?.slice(0, 3)} {selectedDate?.year}
+						</ThemeText>
 						<ThemeButton
 							rippleRadius={22}
 							rippleColor={COLORS.DARK_SECONDARY}
@@ -86,7 +105,18 @@ const Calender = ({ showComplete, detailed = false, defaultDate, updateDate, lab
 							<ThemeText style={styles.legend}>Heading</ThemeText>
 							<TextInput
 								style={{ color: COLORS.FONT_PRIMARY, fontSize: FONT.medium }}
-								defaultValue="04/12/2024"
+								defaultValue={[
+									selectedDate?.date?.toString()?.padStart(2, "0"),
+									(selectedDate?.month + 1)?.toString()?.padStart(2, "0"),
+									selectedDate?.year
+								]?.join("/")}
+								onChangeText={text => {
+									const [d, m, y] = text.split("/")
+									if (+d <= 0 || +d > 31) return
+									if (+m <= 0 || +m > 12) return
+									if (+y < selectedMonth?.year || +y > 2999) return
+									setSelectedDate({ year: +y, month: +m - 1, date: d })
+								}}
 								autoFocus={true}
 							/>
 						</View>
@@ -102,19 +132,29 @@ const Calender = ({ showComplete, detailed = false, defaultDate, updateDate, lab
 								borderRadius={50}
 							>
 								<View style={styles.yearDropDownTrigger}>
-									<ThemeText>{months[scrollPosition]} 2024</ThemeText>
+									<ThemeText>
+										{months[selectedMonth?.month]} {selectedMonth?.year}
+									</ThemeText>
 									<AntDesign name="caretdown" style={[globalStyles.icon, { fontSize: FONT.xxSmall }]} />
 								</View>
 							</ThemeButton>
 							{!flags?.yearSelection && (
 								<View style={styles.detailsCalendernavBtnsWrapper}>
-									<ThemeButton style={styles.navButton} rippleRadius={24} onPress={() => scrollToIndex(-1)}>
+									<ThemeButton
+										style={styles.navButton}
+										rippleRadius={24}
+										onPress={() => scrollToIndex(scrollPosition - 1)}
+									>
 										<Entypo
 											name="chevron-left"
 											style={[globalStyles.icon, { fontSize: FONT.large, marginRight: 1 }]}
 										/>
 									</ThemeButton>
-									<ThemeButton style={styles.navButton} rippleRadius={24} onPress={() => scrollToIndex(1)}>
+									<ThemeButton
+										style={styles.navButton}
+										rippleRadius={24}
+										onPress={() => scrollToIndex(scrollPosition + 1)}
+									>
 										<Entypo
 											name="chevron-right"
 											style={[globalStyles.icon, { fontSize: FONT.large, marginLeft: 1 }]}
@@ -153,7 +193,7 @@ const Calender = ({ showComplete, detailed = false, defaultDate, updateDate, lab
 				{!detailed && (
 					<View>
 						<ThemeText style={styles.monthName}>
-							{months[currentMonth]} {currentYear}
+							{months[selectedMonth?.month]} {selectedMonth?.year}
 						</ThemeText>
 					</View>
 				)}
@@ -207,11 +247,13 @@ const Calender = ({ showComplete, detailed = false, defaultDate, updateDate, lab
 	)
 }
 
-const CalenderModal = props => {
+export const CalenderModal = props => {
 	return (
-		<CustomModal visible={props.visible}>
-			<Calender {...props} detailed={true} />
-		</CustomModal>
+		<CustomModal
+			visible={props.visible}
+			close={props.close}
+			children={({ close }) => <Calender {...props} close={close} detailed={true} />}
+		/>
 	)
 }
 
@@ -386,5 +428,3 @@ const styles = StyleSheet.create({
 		paddingVertical: 12
 	}
 })
-
-export { CalenderModal, Calender }

@@ -213,8 +213,8 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 			</CustomBottomSheet>
 
 			<DateTimeModalWrapper
-				navigation={navigation}
 				visible={task?.visible}
+				navigation={navigation}
 				close={() => setTask(prev => ({ ...prev, visible: false }))}
 			/>
 		</>

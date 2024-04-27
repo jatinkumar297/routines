@@ -1,35 +1,56 @@
-import React from "react"
-import { Dimensions, Modal, StyleSheet, View } from "react-native"
+import { StyleSheet, Animated, StatusBar, View, Dimensions } from "react-native"
+import React, { useEffect, useRef } from "react"
 import { COLORS } from "../utils/constants"
+import { hPadd, modalWidth } from "./ThemeModal"
+const wHeight = Dimensions.get("window").height
 
-export const hPadd = 20
-export const modalWidth = Dimensions.get("window").width * 0.9 - hPadd * 2
+const CustomModal = ({ children, visible, close }) => {
+	const translateY = useRef(new Animated.Value(wHeight)).current
 
-const CustomModal = ({ children, visible, ...props }) => {
+	useEffect(() => {
+		if (visible)
+			Animated.timing(translateY, {
+				toValue: StatusBar.currentHeight / 2,
+				duration: 500,
+				useNativeDriver: true
+			}).start()
+	}, [visible])
+
+	const _close = () => {
+		Animated.timing(translateY, {
+			toValue: wHeight,
+			duration: 250,
+			useNativeDriver: true,
+			delay: 0
+		}).start()
+		setTimeout(() => close(), 200)
+	}
+
 	return (
-		<Modal visible={visible} animationType="slide" transparent>
-			<View
-				style={{
-					...StyleSheet.absoluteFillObject,
-					alignItems: "center",
-					justifyContent: "center",
-					backgroundColor: COLORS.OVERLAY
-				}}
-			>
-				<View
-					style={{
-						backgroundColor: COLORS.DARK_MODAL,
-						borderRadius: 30,
-						width: modalWidth + hPadd * 2,
-						paddingTop: 15
-					}}
-					{...props}
-				>
-					{children}
-				</View>
-			</View>
-		</Modal>
+		<View style={[styles.container, { opacity: visible ? 1 : 0, pointerEvents: visible ? "auto" : "none" }]}>
+			<Animated.View style={[styles.animatedView, { transform: [{ translateY: translateY }] }]}>
+				<View style={styles.modal}>{children({ visible, close: _close })}</View>
+			</Animated.View>
+		</View>
 	)
 }
 
 export default CustomModal
+
+const styles = StyleSheet.create({
+	container: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: COLORS.OVERLAY
+	},
+	animatedView: {
+		...StyleSheet.absoluteFillObject,
+		alignItems: "center",
+		justifyContent: "center"
+	},
+	modal: {
+		backgroundColor: COLORS.DARK_MODAL,
+		borderRadius: 30,
+		width: modalWidth + hPadd * 2,
+		paddingTop: 15
+	}
+})

@@ -47,8 +47,15 @@ today = new Date(today.getTime() - today.getTimezoneOffset() * 60 * 1000)
 export const currentDate = {
 	year: today.getFullYear(),
 	month: today.getMonth(),
-	date: today.getDate()
+	date: today.getUTCDate(),
+	day: today.getUTCDay(),
+	first: 0,
+	week: 0
 }
+
+currentDate.first = currentDate.day - (currentDate.date % 7) + 1
+currentDate.week =
+	Math.floor(currentDate.date / 7) + Math.floor(((currentDate.date % 7) + currentDate.first) / 7) - 1
 
 export const weekFullDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 

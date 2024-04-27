@@ -5,7 +5,7 @@ import { COLORS, FONT } from "../utils/constants"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import globalStyles from "../utils/globalStyles"
 import MaskedView from "@react-native-masked-view/masked-view"
-import CustomModal from "./CustomModal"
+import ThemeModal from "./ThemeModal"
 
 const digitWidth = 48
 const lastPress = {}
@@ -34,7 +34,7 @@ const ClockModal = ({ visible = false, close, submit }) => {
 	}
 
 	return (
-		<CustomModal visible={visible}>
+		<ThemeModal visible={visible}>
 			<View style={{ paddingHorizontal: 25 }}>
 				<ThemeText color={COLORS.FONT_LIGHT} size={13.5} style={{ fontWeight: 600 }}>
 					Select time
@@ -96,7 +96,7 @@ const ClockModal = ({ visible = false, close, submit }) => {
 					</ThemeButton>
 				</View>
 			</View>
-		</CustomModal>
+		</ThemeModal>
 	)
 }
 
