@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react"
 import { StyleSheet, TouchableHighlight, View } from "react-native"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
-import { COLORS, FONT } from "../utils/constants"
+import { COLORS, FONT, weekFullDays } from "../utils/constants"
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import globalStyles from "../utils/globalStyles"
 import ClockModal from "./ClockModal"
@@ -10,10 +10,16 @@ import TimeInput from "./TimeInput"
 import CustomModal from "./CustomModal"
 import Repeats from "../screens/Repeats"
 
-const DateTimeModal = ({ navigation, visible = false, close, onSubmit }) => {
+const DateTimeModal = ({ visible = false, close, submit }) => {
 	const dateSelection = useRef(null)
-	const [data, setData] = useState({ time: null, repeats: null })
+	const [time, setTime] = useState()
 	const [flags, setFlags] = useState({ repeats: false, clock: false })
+
+	const handleSubmit = repeats => {
+		setFlags()
+		if (repeats) submit({ repeats })
+		else submit({ date: dateSelection.current, time })
+	}
 
 	return (
 		<>
@@ -25,11 +31,7 @@ const DateTimeModal = ({ navigation, visible = false, close, onSubmit }) => {
 			<TouchableHighlight onPress={() => setFlags({ clock: true })} underlayColor={COLORS.DARK_HIGHLIGHT}>
 				<View style={[styles.buttonWrapper, { borderTopWidth: StyleSheet.hairlineWidth }]}>
 					<MaterialCommunityIcons name="clock-time-four-outline" style={[globalStyles.icon, styles.buttonIcon]} />
-					{data?.time ? (
-						<TimeInput time={data.time} remove={() => setData(prev => ({ ...prev, time: null }))} advanced />
-					) : (
-						<ThemeText>Set time</ThemeText>
-					)}
+					{time ? <TimeInput time={time} remove={() => setTime()} advanced /> : <ThemeText>Set time</ThemeText>}
 				</View>
 			</TouchableHighlight>
 			<TouchableHighlight onPress={() => setFlags({ repeats: true })} underlayColor={COLORS.DARK_HIGHLIGHT}>
@@ -45,7 +47,7 @@ const DateTimeModal = ({ navigation, visible = false, close, onSubmit }) => {
 					</ThemeText>
 				</ThemeButton>
 
-				<ThemeButton style={styles.bottomBtn} onPress={onSubmit} borderRadius={50}>
+				<ThemeButton style={styles.bottomBtn} onPress={() => handleSubmit()} borderRadius={50}>
 					<ThemeText style={{ fontSize: FONT.regular }} theme>
 						Done
 					</ThemeText>
@@ -54,19 +56,12 @@ const DateTimeModal = ({ navigation, visible = false, close, onSubmit }) => {
 			<ClockModal
 				visible={flags?.clock}
 				close={() => setFlags()}
-				submit={time => {
-					setData(prev => ({ ...prev, time }))
+				submit={_time => {
+					setTime(_time)
 					setFlags()
 				}}
 			/>
-			<Repeats
-				visible={flags?.repeats}
-				close={() => setFlags()}
-				submit={repeats => {
-					setData(prev => ({ ...prev, repeats }))
-					setFlags()
-				}}
-			/>
+			<Repeats time={time} visible={flags?.repeats} close={() => setFlags()} submit={handleSubmit} />
 		</>
 	)
 }

@@ -2,7 +2,7 @@ import React, { forwardRef, useCallback, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { MaterialCommunityIcons, MaterialIcons, Feather, Entypo } from "@expo/vector-icons"
 import { useStore } from "../store"
-import { COLORS, FONT } from "../utils/constants"
+import { COLORS, FONT, generateRepeatsString, generateTimeString } from "../utils/constants"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import Tabs from "../components/Tabs"
 import BottomBar from "../components/BottomBar"
@@ -12,6 +12,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet"
 import globalStyles from "../utils/globalStyles"
 import Screen from "../components/Screen"
 import { DateTimeModalWrapper } from "../components/DateTimeModal"
+import TimeInput from "../components/TimeInput"
 
 function Home({ navigation }) {
 	const bottomBarData = useCallback(
@@ -139,6 +140,7 @@ function Home({ navigation }) {
 }
 
 const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
+	console.log(task)
 	return (
 		<>
 			<CustomBottomSheet ref={ref}>
@@ -171,6 +173,22 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 							multiline
 						/>
 					)}
+
+					{(task?.repeats || task?.time) && (
+						<View style={{ paddingHorizontal: 15, marginTop: 20, marginBottom: 10 }}>
+							<TimeInput
+								text={task?.repeats ? generateRepeatsString(task?.repeats) : generateTimeString(task?.time)}
+								remove={() =>
+									setTask(prev => ({
+										...prev,
+										...(prev?.repeats ? { repeats: null } : { date: null, time: null })
+									}))
+								}
+								advanced
+							/>
+						</View>
+					)}
+
 					<BottomBar
 						leftSideData={[
 							{
@@ -181,7 +199,7 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 							{
 								label: "task-time",
 								Icon: props => <MaterialCommunityIcons name="clock-time-four-outline" size={24} {...props} />,
-								action: () => setTask(prev => ({ ...prev, visible: true }))
+								action: () => setTask(prev => ({ ...prev, dateTimeModal: true }))
 							},
 							{
 								label: "task-star",
@@ -213,9 +231,16 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 			</CustomBottomSheet>
 
 			<DateTimeModalWrapper
-				visible={task?.visible}
+				visible={task?.dateTimeModal}
 				navigation={navigation}
-				close={() => setTask(prev => ({ ...prev, visible: false }))}
+				close={() => setTask(prev => ({ ...prev, dateTimeModal: false }))}
+				submit={data => {
+					setTask(prev => ({
+						...prev,
+						...data,
+						dateTimeModal: null
+					}))
+				}}
 			/>
 		</>
 	)

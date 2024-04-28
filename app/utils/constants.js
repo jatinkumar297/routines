@@ -1,5 +1,12 @@
 export const defaultHPadding = 18
 
+export const cycleUnits = {
+	day: "Daily",
+	week: "Weekly",
+	month: "Monthly",
+	year: "Anually"
+}
+
 export const COLORS = {
 	HIGHLIGHT_THEME: "#313743",
 	DARK_PRIMARY: "#121212",
@@ -121,3 +128,31 @@ export const getCalenderData = () => {
 
 	return calendar
 }
+
+export const generateTimeString = time => `${time.hours}:${time.minutes} ${time.indicator ? "PM" : "AM"}`
+export const generateDateTimeString = (date, time) => `, ` + generateTimeString(time)
+export const generateRepeatsString = repeats =>
+	!repeats
+		? ""
+		: (+repeats.every.cycleInterval > 1
+				? `Every ${repeats.every.cycleInterval} ${repeats.every.intervalUnit}s`
+				: cycleUnits[repeats.every.intervalUnit]) +
+		  (repeats.every.intervalUnit === "week"
+				? " on " +
+				  weekFullDays
+						.slice(Math.min(...repeats.every.weekDays), Math.max(...repeats.every.weekDays) + 1)
+						.map(i => (repeats.every.weekDays.length > 1 ? i.slice(0, 3) : i))
+						.join(", ")
+				: repeats.every.intervalUnit === "month"
+				? ` (on ${
+						repeats.every.date
+							? "day " + repeats.every.date
+							: `every ${weeksInWords[repeats.every.week]} ${weekFullDays[repeats.every.day]}`
+				  })`
+				: "") +
+		  (repeats.every.time ? `, ${generateTimeString(repeats.every.time)}` : "") +
+		  (repeats.ends.date
+				? `, until ${repeats.ends.date.date}/${repeats.ends.date.month}/${repeats.ends.date.year}`
+				: repeats.ends.after
+				? `, ${repeats.ends.after} times`
+				: "")

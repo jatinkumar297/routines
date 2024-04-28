@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { StyleSheet, View, TextInput, Text, Pressable, KeyboardAvoidingView, Platform, Modal } from "react-native"
 import { COLORS, FONT, currentDate, months, weekDays, weekFullDays } from "../utils/constants"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
@@ -7,11 +7,11 @@ import { CalenderModal } from "../components/Calender"
 import globalStyles from "../utils/globalStyles"
 import ClockModal from "../components/ClockModal"
 import DropDown from "../components/DropDown"
-import Screen from "../components/Screen"
 import { FlatList } from "react-native-gesture-handler"
 import { EventProvider } from "react-native-outside-press"
 import Radio from "../components/Radio"
-import CustomModal from "../components/CustomModal"
+
+export const weeksInWords = ["First", "Second", "Third", "Fourth", "Last"]
 
 const options = {
 	intervalUnits: ["day", "week", "month", "year"].map(i => ({ label: i, value: i })),
@@ -25,7 +25,7 @@ const options = {
 						value: idx
 				  }
 		),
-	weeks: ["First", "Second", "Third", "Fourth", "Last"].map((label, value) => ({ label, value: value })),
+	weeks: weeksInWords.map((label, value) => ({ label, value: value })),
 	days: weekFullDays.map((label, value) => ({ label, value: value })),
 	months: months
 		.reduce(
@@ -47,35 +47,45 @@ const options = {
 		.flat()
 }
 
-const Repeats = ({ close, submit, visible = false }) => {
+const Repeats = ({ time, close, submit, visible = false }) => {
 	const [data, setData] = useState({
 		every: {
 			cycleInterval: "1",
-			intervalUnit: options.intervalUnits[2].value,
+			intervalUnit: options.intervalUnits[1].value,
 			weekDays: [currentDate.day],
 			week: currentDate.week,
 			day: currentDate.day,
 			date: currentDate.date - 1
 		},
 		starts: {
-			date: null,
+			date: currentDate,
 			month: null
 		},
 		ends: {
 			never: null,
-			on: null,
-			after: "13"
+			date: currentDate,
+			occurrence: "13"
 		}
 	})
-
-	const [clockState, setClockState] = useState()
 	const [flags, setFlags] = useState({
 		lastField: null,
 		every_month: "date",
 		ends: "date"
 	})
 
+	const [clockState, setClockState] = useState()
 	const [calenderState, setCalenderState] = useState()
+
+	useEffect(() => {
+		if (time)
+			setData(prev => ({
+				...prev,
+				every: {
+					...prev.every,
+					time: time
+				}
+			}))
+	}, [time])
 
 	const handleData = (field, subfield, value) => {
 		setData(prev => ({
@@ -308,23 +318,23 @@ const Repeats = ({ close, submit, visible = false }) => {
 											<ThemeText
 												style={[styles.inputRect, { flexGrow: 1 }]}
 												children={
-													data?.ends?.on
-														? `${data?.ends?.on?.date} ${months[data?.ends?.on?.month]}${
-																+data?.ends?.on?.year === +currentDate.year ? "" : " " + data?.starts?.date?.year
+													data?.ends?.date
+														? `${data?.ends?.date?.date} ${months[data?.ends?.date?.month]}${
+																+data?.ends?.date?.year === +currentDate.year ? "" : " " + data?.starts?.date?.year
 														  }`
 														: "N/A"
 												}
-												onPress={() => setCalenderState({ field: "ends", subfield: "on", label: "End Date" })}
+												onPress={() => setCalenderState({ field: "ends", subfield: "date", label: "End Date" })}
 											/>
 										</View>
 										<View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
-											<RadioContainer field={"ends"} value={"after"} />
+											<RadioContainer field={"ends"} value={"occurrence"} />
 											<ThemeText style={{ width: 45 }}>After</ThemeText>
 											<TextInput
 												style={[styles.inputRect, { textAlign: "center" }]}
 												placeholderTextColor={COLORS.FONT_PRIMARY}
-												value={data?.ends?.after}
-												onChangeText={text => handleData("ends", "after", text.toString())}
+												value={data?.ends?.occurrence}
+												onChangeText={text => handleData("ends", "occurrence", text.toString())}
 												keyboardType="decimal-pad"
 												maxLength={3}
 											/>
