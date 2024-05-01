@@ -15,10 +15,9 @@ const years = Array(201 / 3)
 	.map((_, idx) => [1900 + idx * 3 + 0, 1900 + idx * 3 + 1, 1900 + idx * 3 + 2])
 
 const calenderData = getCalenderData()
-export const Calender = ({ visible, detailed = false, defaultDate, updateDate, label, close, submit }) => {
+export const Calender = ({ visible, detailed = false, selectedDate, setSelectedDate, label, close, submit }) => {
 	const [renderMode, setRenderMode] = useState(0)
 	const [scrollPosition, setScrollPosition] = useState(0)
-	const [selectedDate, setSelectedDate] = useState(defaultDate || currentDate)
 	const [flags, setFlags] = useState({})
 	const listRef = useRef(null)
 
@@ -37,11 +36,10 @@ export const Calender = ({ visible, detailed = false, defaultDate, updateDate, l
 	}
 
 	useEffect(() => {
-		if (visible && defaultDate) {
-			scrollToIndex(defaultDate?.month - data[0].month)
-			if (JSON.stringify(defaultDate) !== JSON.stringify(selectedDate)) setSelectedDate(defaultDate)
+		if (visible && selectedDate) {
+			scrollToIndex(selectedDate?.month - data[0].month)
 		}
-	}, [renderMode, defaultDate])
+	}, [renderMode, selectedDate])
 
 	useEffect(() => {
 		if (visible) setTimeout(() => setRenderMode(2), 350)
@@ -51,15 +49,15 @@ export const Calender = ({ visible, detailed = false, defaultDate, updateDate, l
 		}
 	}, [visible])
 
-	useEffect(() => {
-		updateDate?.(selectedDate)
-		const endTime = performance.now()
-		const renderTime = Math.ceil(endTime - startTime) / 1000
-		console.log(`Calender took ${renderTime} seconds to render; Render Mode - ${renderMode}`)
-	})
+	// useEffect(() => {
+	// 	const endTime = performance.now()
+	// 	const renderTime = Math.ceil(endTime - startTime) / 1000
+	// 	console.log(`Calender took ${renderTime} seconds to render; Render Mode - ${renderMode}`)
+	// })
 
 	const selectedMonth = calenderData[scrollPosition]
 	if (!renderMode) return null
+
 	return (
 		<View style={styles.calenderContainer}>
 			{!detailed ? (
@@ -248,11 +246,21 @@ export const Calender = ({ visible, detailed = false, defaultDate, updateDate, l
 }
 
 export const CalenderModal = props => {
+	const [selectedDate, setSelectedDate] = useState(props?.defaultDate || currentDate)
+
 	return (
 		<CustomModal
 			visible={props.visible}
 			close={props.close}
-			children={({ close }) => <Calender {...props} close={close} detailed={true} />}
+			children={({ close }) => (
+				<Calender
+					{...props}
+					selectedDate={selectedDate}
+					setSelectedDate={setSelectedDate}
+					close={close}
+					detailed={true}
+				/>
+			)}
 		/>
 	)
 }

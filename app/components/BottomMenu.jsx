@@ -25,6 +25,7 @@ const BottomMenu = forwardRef(({ componentKey, heading, data, iconHidden }, ref)
 							rippleDisabled={rippleDisabled}
 							rippleBordered
 							onPress={action}
+							disabled={disabled}
 						>
 							{!iconHidden && (
 								<View style={styles.icon}>{Icon && <Icon size={FONT.xLarge} color={COLORS.FONT_PRIMARY} />}</View>

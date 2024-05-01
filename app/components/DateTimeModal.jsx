@@ -1,40 +1,50 @@
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { StyleSheet, TouchableHighlight, View } from "react-native"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
-import { COLORS, FONT, weekFullDays } from "../utils/constants"
+import { COLORS, FONT, currentDate, generateTimeString } from "../utils/constants"
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import globalStyles from "../utils/globalStyles"
 import ClockModal from "./ClockModal"
 import { Calender } from "./Calender"
-import TimeInput from "./TimeInput"
+import TimeLabel from "./TimeLabel"
 import CustomModal from "./CustomModal"
-import Repeats from "../screens/Repeats"
 
-const DateTimeModal = ({ visible = false, close, submit }) => {
-	const dateSelection = useRef(null)
-	const [time, setTime] = useState()
-	const [flags, setFlags] = useState({ repeats: false, clock: false })
+const DEFAULT_SELECTION = { date: currentDate, time: null }
+const DateTimeModal = ({ visible = false, close, data, submit, callRepeats }) => {
+	const [selection, setSelection] = useState(DEFAULT_SELECTION)
+	const [showClock, setShowClock] = useState()
 
-	const handleSubmit = repeats => {
-		setFlags()
-		if (repeats) submit({ repeats })
-		else submit({ date: dateSelection.current, time })
+	useEffect(() => {
+		if (data) setSelection(data)
+		else setSelection(DEFAULT_SELECTION)
+	}, [data])
+
+	const handleSubmit = () => {
+		setShowClock()
+		submit(selection)
 	}
 
 	return (
 		<>
 			<Calender
 				visible={visible}
-				defaultDate={dateSelection.current}
-				updateDate={date => (dateSelection.current = date)}
+				selectedDate={selection?.date}
+				setSelectedDate={date => setSelection(prev => ({ ...prev, date }))}
 			/>
-			<TouchableHighlight onPress={() => setFlags({ clock: true })} underlayColor={COLORS.DARK_HIGHLIGHT}>
+			<TouchableHighlight onPress={() => setShowClock(true)} underlayColor={COLORS.DARK_HIGHLIGHT}>
 				<View style={[styles.buttonWrapper, { borderTopWidth: StyleSheet.hairlineWidth }]}>
 					<MaterialCommunityIcons name="clock-time-four-outline" style={[globalStyles.icon, styles.buttonIcon]} />
-					{time ? <TimeInput time={time} remove={() => setTime()} advanced /> : <ThemeText>Set time</ThemeText>}
+					{selection?.time?.hours ? (
+						<TimeLabel
+							text={generateTimeString(selection?.time)}
+							remove={() => setSelection(prev => ({ ...prev, time: null }))}
+						/>
+					) : (
+						<ThemeText>Set time</ThemeText>
+					)}
 				</View>
 			</TouchableHighlight>
-			<TouchableHighlight onPress={() => setFlags({ repeats: true })} underlayColor={COLORS.DARK_HIGHLIGHT}>
+			<TouchableHighlight onPress={() => callRepeats(selection)} underlayColor={COLORS.DARK_HIGHLIGHT}>
 				<View style={styles.buttonWrapper}>
 					<MaterialIcons name="repeat" style={[globalStyles.icon, styles.buttonIcon]} />
 					<ThemeText>Repeat</ThemeText>
@@ -47,21 +57,20 @@ const DateTimeModal = ({ visible = false, close, submit }) => {
 					</ThemeText>
 				</ThemeButton>
 
-				<ThemeButton style={styles.bottomBtn} onPress={() => handleSubmit()} borderRadius={50}>
+				<ThemeButton style={styles.bottomBtn} onPress={handleSubmit} borderRadius={50}>
 					<ThemeText style={{ fontSize: FONT.regular }} theme>
 						Done
 					</ThemeText>
 				</ThemeButton>
 			</View>
 			<ClockModal
-				visible={flags?.clock}
-				close={() => setFlags()}
+				visible={showClock}
+				close={() => setShowClock()}
 				submit={_time => {
-					setTime(_time)
-					setFlags()
+					setSelection(prev => ({ ...prev, time: _time }))
+					setShowClock()
 				}}
 			/>
-			<Repeats time={time} visible={flags?.repeats} close={() => setFlags()} submit={handleSubmit} />
 		</>
 	)
 }

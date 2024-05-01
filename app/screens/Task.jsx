@@ -1,26 +1,26 @@
 import React, { useRef, useState } from "react"
-import { View, TextInput, StyleSheet, Animated, Dimensions, StatusBar, TouchableOpacity } from "react-native"
-import { COLORS, FONT, defaultHPadding } from "../utils/constants"
-import globalStyles from "../utils/globalStyles"
+import { View, TextInput, StyleSheet, TouchableOpacity } from "react-native"
+import { COLORS, FONT, defaultHPadding, generateDateTimeString, generateRepeatsString } from "../utils/constants"
 import { ThemeButton, ThemeText } from "../components/ThemeComponents"
-import { Ionicons, AntDesign, MaterialCommunityIcons, Feather } from "@expo/vector-icons"
-import TimeInput from "../components/TimeInput"
+import { Ionicons, AntDesign, MaterialCommunityIcons, MaterialIcons, Feather } from "@expo/vector-icons"
+import { DateTimeModalWrapper } from "../components/DateTimeModal"
+import TimeLabel from "../components/TimeLabel"
 import BottomBar from "../components/BottomBar"
 import BottomMenu from "../components/BottomMenu"
 import Screen from "../components/Screen"
-import { DateTimeModalWrapper } from "../components/DateTimeModal"
+import Repeats from "./Repeats"
+import useStore from "../store/zustand"
+import globalStyles from "../utils/globalStyles"
 
-function Task({ navigation, id }) {
+function Task({ navigation, route }) {
+	const { taskId } = route.params
 	const refBottomSheet = useRef()
 
-	const [dateTimeModal, setDateTimeModal] = useState()
-	const [task, setTask] = useState({
-		title: "The Good Stuff",
-		description:
-			"This is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test this is a random paragraph to fill the space in the second input of the screen to test."
-	})
-
-	const setData = data => setTask(prev => ({ ...prev, ...data }))
+	const [state, setState] = useState({})
+	const lists = useStore(state => state.lists.map(i => ({ _id: i._id, title: i.title })))
+	const task = useStore(state => state.tasks.find(i => i?._id === taskId))
+	const updateTask = useStore(state => state.updateTask)
+	const setTask = f => updateTask(f(task))
 
 	return (
 		<Screen>
@@ -30,38 +30,81 @@ function Task({ navigation, id }) {
 						<Ionicons name="arrow-back-sharp" style={globalStyles.icon} />
 					</ThemeButton>
 				</View>
-				<TouchableOpacity onPress={() => refBottomSheet.current.open()} style={styles.listTrigger}>
+				<TouchableOpacity onPress={() => refBottomSheet.current.expand()} style={styles.listTrigger}>
 					<ThemeText style={{ fontSize: FONT.small }} theme>
-						My Tasks
+						{lists?.find(i => i._id === task?.listId)?.title}
 					</ThemeText>
 					<AntDesign name="caretdown" size={FONT.xxSmall} color={COLORS.THEME} />
 				</TouchableOpacity>
 				<TextInput
 					value={task?.title}
-					onTextInput={title => setData({ title })}
+					onChangeText={title => setTask(prev => ({ ...prev, title }))}
 					style={[styles.input, styles.title]}
 					multiline
 				/>
 				<View style={styles.inputWrapper}>
 					<MaterialCommunityIcons name="text" style={globalStyles.icon} />
 					<TextInput
-						value={task?.description}
-						onTextInput={description => setData({ description })}
-						style={[styles.input, styles.description]}
-						multiline={true}
+						value={task?.details}
+						placeholder="Add details"
+						placeholderTextColor={COLORS.FONT_LIGHT}
+						onChangeText={details => setTask(prev => ({ ...prev, details }))}
+						style={[styles.input, styles.details]}
+						multiline
 					/>
 				</View>
 
 				<View style={styles.inputWrapper}>
-					<MaterialCommunityIcons name="clock-time-four-outline" style={globalStyles.icon} />
-					<TimeInput onPress={() => setDateTimeModal({ visible: true })} advanced />
+					{task?.repeats ? (
+						<MaterialIcons name="repeat" style={globalStyles.icon} />
+					) : (
+						<MaterialCommunityIcons name="clock-time-four-outline" style={globalStyles.icon} />
+					)}
+					<TimeLabel
+						onPress={() =>
+							setState(
+								task?.repeats ? { repeats: { visible: true, data: task?.repeats } } : { dateTimeModal: true }
+							)
+						}
+						placeholder={"Set time"}
+						text={
+							task?.repeats
+								? generateRepeatsString(task?.repeats)
+								: task?.date || task?.time
+								? generateDateTimeString(task?.date, task?.time)
+								: null
+						}
+						remove={() =>
+							setTask(prev => ({
+								...prev,
+								...(prev?.repeats ? { repeats: null } : { date: null, time: null })
+							}))
+						}
+					/>
 				</View>
 			</View>
 
 			<DateTimeModalWrapper
-				navigation={navigation}
-				visible={dateTimeModal?.visible}
-				close={() => setDateTimeModal()}
+				visible={state?.dateTimeModal}
+				callRepeats={data => setState(prev => ({ ...prev, repeats: { data, visible: true } }))}
+				close={() => setState(prev => ({ ...prev, dateTimeModal: false }))}
+				data={task?.date ? { date: task?.date, time: task?.time } : null}
+				submit={data => {
+					setState(prev => ({ ...prev, dateTimeModal: false }))
+					setTask(prev => ({
+						...prev,
+						...data
+					}))
+				}}
+			/>
+
+			<Repeats
+				{...state?.repeats}
+				close={() => setState(prev => ({ ...prev, repeats: null }))}
+				submit={repeats => {
+					setState({})
+					setTask(prev => ({ ...prev, repeats }))
+				}}
 			/>
 
 			<BottomBar
@@ -83,7 +126,14 @@ function Task({ navigation, id }) {
 				ref={refBottomSheet}
 				heading={"Move task to"}
 				data={[
-					[{ label: "My Tasks", Icon: props => <Feather name="check" {...props} /> }, { label: "Order List" }]
+					lists?.map(i => ({
+						label: i.title,
+						value: i._id,
+						...(task?.listId === i._id ? { Icon: props => <Feather name="check" {...props} /> } : {}),
+						action: () => {
+							updateTask({ ...task, listId: i._id }), refBottomSheet.current.close()
+						}
+					}))
 				]}
 			/>
 		</Screen>
@@ -109,18 +159,17 @@ const styles = StyleSheet.create({
 		fontSize: FONT.normal
 	},
 	title: {
-		marginVertical: 10,
 		fontSize: FONT.xLarge
+	},
+	details: {
+		height: "auto",
+		flex: 1
 	},
 	inputWrapper: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 16,
-		marginBottom: 12
-	},
-	description: {
-		flexShrink: 1,
-		height: "auto"
+		marginTop: 18
 	}
 })
 

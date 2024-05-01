@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { StyleSheet, View, TextInput, Text, Pressable, KeyboardAvoidingView, Platform, Modal } from "react-native"
-import { COLORS, FONT, currentDate, months, weekDays, weekFullDays } from "../utils/constants"
+import { COLORS, FONT, currentDate, months, weekDays, weekFullDays, weeksInWords } from "../utils/constants"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
 import { CalenderModal } from "../components/Calender"
@@ -10,8 +10,6 @@ import DropDown from "../components/DropDown"
 import { FlatList } from "react-native-gesture-handler"
 import { EventProvider } from "react-native-outside-press"
 import Radio from "../components/Radio"
-
-export const weeksInWords = ["First", "Second", "Third", "Fourth", "Last"]
 
 const options = {
 	intervalUnits: ["day", "week", "month", "year"].map(i => ({ label: i, value: i })),
@@ -47,26 +45,28 @@ const options = {
 		.flat()
 }
 
-const Repeats = ({ time, close, submit, visible = false }) => {
-	const [data, setData] = useState({
-		every: {
-			cycleInterval: "1",
-			intervalUnit: options.intervalUnits[1].value,
-			weekDays: [currentDate.day],
-			week: currentDate.week,
-			day: currentDate.day,
-			date: currentDate.date - 1
-		},
-		starts: {
-			date: currentDate,
-			month: null
-		},
-		ends: {
-			never: null,
-			date: currentDate,
-			occurrence: "13"
-		}
-	})
+const DEFAULT_REPEATS = {
+	every: {
+		cycleInterval: "1",
+		intervalUnit: options.intervalUnits[1].value,
+		weekDays: [currentDate.day],
+		week: currentDate.week,
+		day: currentDate.day,
+		date: currentDate.date - 1
+	},
+	starts: {
+		date: currentDate,
+		month: null
+	},
+	ends: {
+		never: null,
+		date: currentDate,
+		occurrence: "13"
+	}
+}
+
+const Repeats = ({ data: _data, close, submit, visible = false }) => {
+	const [data, setData] = useState(DEFAULT_REPEATS)
 	const [flags, setFlags] = useState({
 		lastField: null,
 		every_month: "date",
@@ -77,15 +77,37 @@ const Repeats = ({ time, close, submit, visible = false }) => {
 	const [calenderState, setCalenderState] = useState()
 
 	useEffect(() => {
-		if (time)
-			setData(prev => ({
-				...prev,
-				every: {
-					...prev.every,
-					time: time
-				}
-			}))
-	}, [time])
+		return () => setData(DEFAULT_REPEATS)
+	}, [])
+
+	useEffect(() => {
+		if (!_data) return
+		const { time, date, ...restOfRepeats } = _data
+		const _repeats = {
+			every: {
+				...DEFAULT_REPEATS?.every,
+				...restOfRepeats?.every
+			},
+			starts: {
+				...DEFAULT_REPEATS?.starts,
+				...restOfRepeats?.starts
+			},
+			ends: {
+				...DEFAULT_REPEATS?.ends,
+				...restOfRepeats?.ends
+			}
+		}
+
+		if (time) _repeats.every.time = time
+		if (date) _repeats.starts.date = date
+
+		setData(_repeats)
+		setFlags({
+			lastField: null,
+			every_month: restOfRepeats?.every?.month?.date ? "day" : "date",
+			ends: restOfRepeats?.ends?.never ? "never" : restOfRepeats?.ends?.occurrence ? "occurence" : "date"
+		})
+	}, [_data])
 
 	const handleData = (field, subfield, value) => {
 		setData(prev => ({

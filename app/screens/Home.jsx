@@ -1,8 +1,7 @@
-import React, { forwardRef, useCallback, useRef, useState } from "react"
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { MaterialCommunityIcons, MaterialIcons, Feather, Entypo } from "@expo/vector-icons"
-import { useStore } from "../store"
-import { COLORS, FONT, generateRepeatsString, generateTimeString } from "../utils/constants"
+import { COLORS, FONT, generateDateTimeString, generateRepeatsString } from "../utils/constants"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
 import Tabs from "../components/Tabs"
 import BottomBar from "../components/BottomBar"
@@ -12,45 +11,49 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet"
 import globalStyles from "../utils/globalStyles"
 import Screen from "../components/Screen"
 import { DateTimeModalWrapper } from "../components/DateTimeModal"
-import TimeInput from "../components/TimeInput"
+import TimeLabel from "../components/TimeLabel"
+import Repeats from "./Repeats"
+import useStore from "../store/zustand"
 
 function Home({ navigation }) {
 	const bottomBarData = useCallback(
-		() => ({
-			home: {
-				leftSideData: [
-					{
-						label: "list",
-						Icon: props => <MaterialIcons name="list-alt" size={24} {...props} />,
-						action: () => handleBottomSheet(0)
-					},
-					{
-						label: "sort",
-						Icon: props => <MaterialCommunityIcons name="swap-vertical" size={24} {...props} />,
-						action: () => handleBottomSheet(1)
-					},
-					{
-						label: "menu",
-						Icon: props => <Entypo name="dots-three-horizontal" size={18} {...props} />,
-						action: () => handleBottomSheet(2)
-					}
-				],
-				rightSideData: [
-					{
-						label: "add",
-						Component: () => (
-							<ThemeButton style={styles.addIcon} borderRadius={15} onPress={() => newTaskRef.current.expand()}>
-								<MaterialIcons name="add" color={"#c3e7ff"} size={26} />
-							</ThemeButton>
-						)
-					}
-				]
-			}
+		selectedList => ({
+			leftSideData: [
+				{
+					label: "list",
+					Icon: props => <MaterialIcons name="list-alt" size={24} {...props} />,
+					action: () => handleBottomSheet(0)
+				},
+				{
+					label: "sort",
+					Icon: props => <MaterialCommunityIcons name="swap-vertical" size={24} {...props} />,
+					action: () => handleBottomSheet(1)
+				},
+				...(selectedList
+					? [
+							{
+								label: "menu",
+								Icon: props => <Entypo name="dots-three-horizontal" size={18} {...props} />,
+								action: () => handleBottomSheet(2)
+							}
+					  ]
+					: [])
+			],
+			rightSideData: [
+				{
+					label: "add",
+					Component: () => (
+						<ThemeButton style={styles.addIcon} borderRadius={15} onPress={() => newTaskRef.current.expand()}>
+							<MaterialIcons name="add" color={"#c3e7ff"} size={26} />
+						</ThemeButton>
+					)
+				}
+			]
 		}),
-		[]
-	)()
+		[selectedList]
+	)
 	const bottomSheetData = useCallback(
-		() => [
+		selectedList => [
 			{
 				componentKey: "lists",
 				data: [
@@ -94,21 +97,27 @@ function Home({ navigation }) {
 				iconHidden: true,
 				data: [
 					[
-						{ label: "Rename list" },
-						{ label: "Delete list", detail: "Default list can't be deleted", disabled: true },
+						{
+							label: "Rename list",
+							action: () => navigation.push("list-title", { listId: selectedList })
+						},
+						{
+							label: "Delete list",
+							...(selectedList === 1 ? { detail: "Default list can't be deleted", disabled: true } : {})
+						},
 						{ label: "Delete all completed tasks" }
 					]
 				]
 			}
 		],
 		[]
-	)()
+	)
 
-	const listNames = useStore(state => state.lists.map(({ _id, title }) => ({ _id, title })))
-	const [task, setTask] = useState()
 	const bottomMenuRef = useRef(null)
 	const newTaskRef = useRef(null)
+	const listNames = useStore(state => state.lists.map(({ _id, title }) => ({ _id, title })))
 
+	const [selectedList, setSelectedList] = useState(1)
 	const [sheetDataIndex, setSheetDataIndex] = useState(null)
 
 	const handleBottomSheet = index => {
@@ -126,21 +135,42 @@ function Home({ navigation }) {
 					<ThemeText style={styles.profileText}>J</ThemeText>
 				</View>
 			</View>
-			<Tabs navigate={screen => navigation.push(screen)} listNames={listNames} />
-			<BottomBar {...bottomBarData.home} />
+			<Tabs
+				onScreenChange={i => setSelectedList(i)}
+				navigate={screen => navigation.push(screen)}
+				listNames={listNames}
+			/>
+			<BottomBar {...bottomBarData(selectedList)} />
 			<BottomMenu
 				ref={bottomMenuRef}
 				onClose={() => setSheetDataIndex(null)}
-				{...(sheetDataIndex !== null ? bottomSheetData[sheetDataIndex] : {})}
+				{...(sheetDataIndex !== null ? bottomSheetData(selectedList)[sheetDataIndex] : {})}
 			/>
 
-			<CreateNewTask ref={newTaskRef} navigation={navigation} task={task} setTask={setTask} />
+			<CreateNewTask ref={newTaskRef} listId={selectedList} close={() => newTaskRef.current.close()} />
 		</Screen>
 	)
 }
 
-const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
-	console.log(task)
+const CreateNewTask = forwardRef(({ listId, close }, ref) => {
+	const [task, setTask] = useState({})
+	const addNewTask = useStore(state => state.addNewTask)
+
+	useEffect(() => {
+		return () => setTask({})
+	}, [])
+
+	const [state, setState] = useState({})
+	const handleClockPress = () =>
+		task?.repeats
+			? setState({ repeats: { visible: true, data: task?.repeats } })
+			: setState({ dateTimeModal: true })
+
+	const handleSave = () => {
+		close()
+		addNewTask({ listId, ...task })
+	}
+
 	return (
 		<>
 			<CustomBottomSheet ref={ref}>
@@ -155,9 +185,9 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 						}}
 						placeholderTextColor={COLORS.FONT_PRIMARY}
 						value={task?.title}
-						onTextInput={str => setTask(prev => ({ ...prev, title: str }))}
+						onChangeText={str => setTask(prev => ({ ...prev, title: str }))}
 					/>
-					{task?.details !== undefined && (
+					{state?.details && (
 						<BottomSheetTextInput
 							placeholder="Add details"
 							style={{
@@ -169,22 +199,27 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 							}}
 							placeholderTextColor={COLORS.FONT_PRIMARY}
 							value={task?.details}
-							onTextInput={str => setTask(prev => ({ ...prev, details: str }))}
+							onChangeText={str => setTask(prev => ({ ...prev, details: str }))}
 							multiline
 						/>
 					)}
 
-					{(task?.repeats || task?.time) && (
+					{(task?.repeats || task?.date || task?.time) && (
 						<View style={{ paddingHorizontal: 15, marginTop: 20, marginBottom: 10 }}>
-							<TimeInput
-								text={task?.repeats ? generateRepeatsString(task?.repeats) : generateTimeString(task?.time)}
+							<TimeLabel
+								onPress={handleClockPress}
+								text={
+									task?.repeats
+										? generateRepeatsString(task?.repeats)
+										: generateDateTimeString(task?.date, task?.time)
+								}
+								LeftIcon={task?.repeats ? props => <MaterialIcons name="repeat" {...props} /> : null}
 								remove={() =>
 									setTask(prev => ({
 										...prev,
 										...(prev?.repeats ? { repeats: null } : { date: null, time: null })
 									}))
 								}
-								advanced
 							/>
 						</View>
 					)}
@@ -194,12 +229,12 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 							{
 								label: "task-detail",
 								Icon: props => <MaterialCommunityIcons name="text" size={24} {...props} />,
-								action: () => setTask(prev => ({ ...prev, details: "" }))
+								action: () => setState(prev => ({ ...prev, details: true }))
 							},
 							{
 								label: "task-time",
 								Icon: props => <MaterialCommunityIcons name="clock-time-four-outline" size={24} {...props} />,
-								action: () => setTask(prev => ({ ...prev, dateTimeModal: true }))
+								action: handleClockPress
 							},
 							{
 								label: "task-star",
@@ -217,7 +252,7 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 							{
 								label: "task-add",
 								Component: () => (
-									<ThemeButton style={globalStyles.ractButton} rippleBordered>
+									<ThemeButton style={globalStyles.ractButton} onPress={handleSave} rippleBordered>
 										<ThemeText style={globalStyles.ractButtonText} theme>
 											Save
 										</ThemeText>
@@ -231,15 +266,25 @@ const CreateNewTask = forwardRef(({ navigation, task, setTask }, ref) => {
 			</CustomBottomSheet>
 
 			<DateTimeModalWrapper
-				visible={task?.dateTimeModal}
-				navigation={navigation}
-				close={() => setTask(prev => ({ ...prev, dateTimeModal: false }))}
+				visible={state?.dateTimeModal}
+				callRepeats={data => setState(prev => ({ ...prev, repeats: { data, visible: true } }))}
+				close={() => setState(prev => ({ ...prev, dateTimeModal: false }))}
+				data={task?.date ? { date: task?.date, time: task?.time } : null}
 				submit={data => {
+					setState(prev => ({ ...prev, dateTimeModal: false }))
 					setTask(prev => ({
 						...prev,
-						...data,
-						dateTimeModal: null
+						...data
 					}))
+				}}
+			/>
+
+			<Repeats
+				{...state?.repeats}
+				close={() => setState(prev => ({ ...prev, repeats: null }))}
+				submit={repeats => {
+					setState({})
+					setTask(prev => ({ ...prev, repeats }))
 				}}
 			/>
 		</>

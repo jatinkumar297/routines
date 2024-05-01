@@ -1,17 +1,23 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs"
-import List from "../screens/List"
+import React from "react"
 import { COLORS, FONT } from "../utils/constants"
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import { ThemeButton, ThemeText } from "./ThemeComponents"
-import React from "react"
+import List from "../screens/List"
 
 const Tab = createMaterialTopTabNavigator()
 
-export default function Tabs({ navigate, listNames }) {
+export default function Tabs({ navigate, listNames, onScreenChange }) {
 	return (
 		<Tab.Navigator
 			sceneContainerStyle={{
 				backgroundColor: COLORS.DARK_PRIMARY
+			}}
+			screenListeners={{
+				state: e => {
+					const listId = e.data.state.index > 0 ? listNames[e.data.state.index - 1]?._id : 0
+					onScreenChange(listId)
+				}
 			}}
 			screenOptions={{
 				lazy: true,

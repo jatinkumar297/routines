@@ -1,17 +1,26 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { StyleSheet, View, TextInput } from "react-native"
 import { COLORS, FONT, defaultHPadding } from "../utils/constants"
 import { AntDesign } from "@expo/vector-icons"
 import globalStyles from "../utils/globalStyles"
 import { ThemeText, ThemeButton } from "../components/ThemeComponents"
-import { useStore } from "../store"
 import Screen from "../components/Screen"
+import useStore from "../store/zustand"
 
-function ListTitle({ navigation }) {
+function ListTitle({ navigation, route }) {
+	const { listId } = route.params
 	const [title, setTitle] = useState("")
+
+	useEffect(() => {
+		if (!listId) return
+		setTitle(useStore.getState().lists.find(i => i.title)?.title)
+	}, [listId])
+
 	const addNewList = useStore(state => state.addNewList)
-	const addNewListWrapper = async () => {
-		await addNewList(title)
+	const updateList = useStore(state => state.updateList)
+	const actionHandler = async () => {
+		if (listId) await updateList(listId, title)
+		else await addNewList(title)
 		navigation.goBack()
 	}
 
@@ -32,11 +41,11 @@ function ListTitle({ navigation }) {
 					>
 						<AntDesign name="close" color={COLORS.FONT_PRIMARY} size={FONT.xLarge} />
 					</ThemeButton>
-					<ThemeText style={{ fontSize: FONT.xLarge }}>Create new list</ThemeText>
+					<ThemeText style={{ fontSize: FONT.xLarge }}>{listId ? "Update" : "Create new"} list</ThemeText>
 				</View>
 
 				{title?.length > 0 && (
-					<ThemeButton _containerStyle={{ alignSelf: "center" }} rippleDisabled onPress={addNewListWrapper}>
+					<ThemeButton _containerStyle={{ alignSelf: "center" }} rippleDisabled onPress={actionHandler}>
 						<ThemeText theme>Done</ThemeText>
 					</ThemeButton>
 				)}

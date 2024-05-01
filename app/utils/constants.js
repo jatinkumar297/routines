@@ -65,6 +65,7 @@ currentDate.week =
 	Math.floor(currentDate.date / 7) + Math.floor(((currentDate.date % 7) + currentDate.first) / 7) - 1
 
 export const weekFullDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+export const weeksInWords = ["First", "Second", "Third", "Fourth", "Last"]
 
 export const weekDays = weekFullDays.map(i => i[0])
 
@@ -129,8 +130,15 @@ export const getCalenderData = () => {
 	return calendar
 }
 
+export const getDay = ({ year, month, date }) =>
+	new Date([year, (month + 1).toString().padStart(2, "0"), date.toString().padStart(2, "0")].join("-")).getDay()
+
 export const generateTimeString = time => `${time.hours}:${time.minutes} ${time.indicator ? "PM" : "AM"}`
-export const generateDateTimeString = (date, time) => `, ` + generateTimeString(time)
+export const generateDateTimeString = (date, time) =>
+	`${weekFullDays[getDay(date)]?.slice(0, 3)}, ${date.date} ${months[date.month].slice(0, 3)}${
+		date.year === currentDate.year ? "" : ", " + date.year
+	}` + (time?.hours ? ", " + generateTimeString(time) : "")
+
 export const generateRepeatsString = repeats =>
 	!repeats
 		? ""
