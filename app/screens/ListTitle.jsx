@@ -8,12 +8,12 @@ import Screen from "../components/Screen"
 import useStore from "../store/zustand"
 
 function ListTitle({ navigation, route }) {
-	const { listId } = route.params
+	const { listId } = route.params || {}
 	const [title, setTitle] = useState("")
 
 	useEffect(() => {
 		if (!listId) return
-		setTitle(useStore.getState().lists.find(i => i.title)?.title)
+		setTitle(useStore.getState().lists.find(i => i._id === listId)?.title)
 	}, [listId])
 
 	const addNewList = useStore(state => state.addNewList)
